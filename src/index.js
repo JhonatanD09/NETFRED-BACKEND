@@ -1,5 +1,7 @@
 const express = require('express');
 const config = require('./config');
+import {routes} from './constans/RoutesConstans'
+
 const app = express();
 const port = config.app.port
 
@@ -17,7 +19,7 @@ app.use((_req, res, next) => {
 	next(); 
 });
 
-app.use('/api/v1/user', require('../src/routes/user.routes'));
+app.use(routes.USER_ROUTER, require('../src/routes/user.routes'));
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

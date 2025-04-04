@@ -1,17 +1,18 @@
-import {createUser,findByEmail,encryptPass} from '../db/queryes/user.query'
+import {createUser,findByEmail,encryptPass} from '../db/queries/user.query'
+import {userMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res)=>{
     const user = await concatUserInfo(req.body, res)
     const userByEmail = await findByEmail(user.correo)
     if(userByEmail[0].length>0){
-        res.status(404).json({message: 'Ya existe un usuario con ese email'})
+        res.status(404).json({message: userMessages.USER_EXIST})
     }
     else{
         try{
             await createUser(user)
-            res.status(201).json({message: 'Usuario creado correctamente'})
+            res.status(201).json({message: userMessages.USER_ADD})
         }catch{
-            res.status(404).json({message: 'Usuario no creado '})
+            res.status(404).json({message: userMessages.USER_NOT_ADD})
         }
     }
 }
