@@ -1,4 +1,3 @@
-import {findById} from '../db/queries/user.query'
 
 export const verifyAdminRole = async(req, res, next) =>{
     try{
