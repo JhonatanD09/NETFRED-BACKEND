@@ -4,3 +4,7 @@ export const userMessages = {
     USER_NOT_ADD : 'Usuario no creado'
 }
 
+export const valideRolesMessages = {
+    NO_ROLE_REQUIRED: 'No cuentas con los permisos para acceder a este recurso'
+}
+
