@@ -20,6 +20,7 @@ app.use((_req, res, next) => {
 });
 
 app.use(routes.USER_ROUTER, require('../src/routes/user.routes'));
+app.use(routes.AUTH_ROUTER, require('../src/routes/auth.routes'));
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
