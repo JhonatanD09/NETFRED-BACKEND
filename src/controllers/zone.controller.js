@@ -1,0 +1,91 @@
+import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone} from '../db/queries/zone.query'
+import {zonesMessages} from '../constans/ErrorConstans'
+
+const create = async (req,res) =>{
+    const zone = await concatZoneInfo(req.body)
+    const zoneByName = await searchZoneByName(zone.nombre)
+    if(zoneByName[0].length>0){
+        res.status(404).json({message: zonesMessages.ZONE_EXIST})
+    }
+    else{
+        try{
+            await createZone(zone)
+            res.status(201).json({message: zonesMessages.ZONE_ADD})
+        }catch{
+            res.status(404).json({message: zonesMessages.ZONE_NOT_ADD})
+        }
+    }
+}
+
+const getZoneByName = async (req,res) =>{
+    const nombre = req.params.nombre;
+    try{
+        const result = await searchZoneByName(nombre);
+        if (result[0].length > 0) {
+            res.status(201).json(result[0][0]);
+        } else{
+            res.status(404).json({ message: ZONE_NOT_FOUND });
+        }
+    } catch (error){
+        res.status(404).json({ message: ERROR_SEARCH_ZONE });
+    }
+}
+
+const getZoneById = async (req,res) =>{
+    const id = req.params.id;
+    try{
+        const result = await searchZoneByID(id);
+        if (result[0].length > 0) {
+            res.status(201).json(result[0][0]);
+        } else{
+            res.status(404).json({ message: ZONE_NOT_FOUND });
+        }
+    } catch (error){
+        res.status(404).json({ message: ERROR_SEARCH_ZONE });
+    }
+}
+
+const remove = async(req,res)=>{
+    const id = req.params.id
+    const zone = await searchZoneByID(id)
+    if (zone[0].length === 0) {
+        res.status(404).json({ message: zonesMessages.ZONE_NOT_FOUND })
+    }
+    else{
+        try{
+            await deleteZone(id)
+            res.status(201).json({ message: zonesMessages.ZONE_DELETED })
+        }catch{
+            res.status(404).json({ message: zonesMessages.ZONE_NOT_DELETED })
+        }
+    }
+}
+
+const update = async (req, res) => {
+    const id = req.params.id;
+    const zone = await concatZoneInfo(req.body);
+
+    try {
+        const existing = await searchZoneByID(id);
+        if (existing[0].length === 0) {
+            return res.status(404).json({ message: ZONE_NOT_FOUND });
+        }
+
+        await updateZone(zone, id);
+        res.status(200).json({ message: zonesMessages.ZONE_UPDATED });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: zonesMessages.ZONE_NOT_UPDATED });
+    }
+};
+
+const concatZoneInfo = async (info) =>{
+    return{
+        nombre: info.name,
+        detalles: info.details
+    }
+}
+
+module.exports = {
+    create,concatZoneInfo,remove,getZoneByName,getZoneById, update
+}
