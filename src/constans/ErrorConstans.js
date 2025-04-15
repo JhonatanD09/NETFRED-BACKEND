@@ -17,6 +17,18 @@ export const zonesMessages = {
 
 }
 
+export const clientsMessages = {
+    CLIENT_EXIST: 'Ya existe un cliente con ese numero de cedula',
+    CLIENT_ADD: 'Cliente creado correctamente',
+    CLIENT_NOT_ADD : 'Cliente no creado',
+    CLIENT_NOT_FOUND:'Cliente no encontrado',
+    CLIENT_DELETED:'Cliente eliminado',
+    CLIENT_NOT_DELETED:'El Cliente no se ha eliminado',
+    ERROR_SEARCH_CLIENT: 'Error al buscar el Cliente',
+    CLIENT_UPDATED: 'Cliente actualizado correctamente',
+    CLIENT_NOT_UPDATED: 'Error al actualizar el Cliente'
+}
+
 export const valideRolesMessages = {
     NO_ROLE_REQUIRED: 'No cuentas con los permisos para acceder a este recurso'
 }

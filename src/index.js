@@ -21,6 +21,7 @@ app.use((_req, res, next) => {
 
 app.use(routes.USER_ROUTER, require('../src/routes/user.routes'));
 app.use(routes.ZONE_ROUTER, require('../src/routes/zone.routes'));
+app.use(routes.CLIENT_ROUTER, require('../src/routes/client.routes'));
 app.use(routes.AUTH_ROUTER, require('../src/routes/auth.routes'));
 
 app.listen(port, () => {

@@ -24,10 +24,10 @@ const getZoneByName = async (req,res) =>{
         if (result[0].length > 0) {
             res.status(201).json(result[0][0]);
         } else{
-            res.status(404).json({ message: ZONE_NOT_FOUND });
+            res.status(404).json({ message: zonesMessages.ZONE_NOT_FOUND });
         }
     } catch (error){
-        res.status(404).json({ message: ERROR_SEARCH_ZONE });
+        res.status(404).json({ message: zonesMessages.ERROR_SEARCH_ZONE });
     }
 }
 
@@ -38,10 +38,10 @@ const getZoneById = async (req,res) =>{
         if (result[0].length > 0) {
             res.status(201).json(result[0][0]);
         } else{
-            res.status(404).json({ message: ZONE_NOT_FOUND });
+            res.status(404).json({ message: zonesMessages.ZONE_NOT_FOUND });
         }
     } catch (error){
-        res.status(404).json({ message: ERROR_SEARCH_ZONE });
+        res.status(404).json({ message: zonesMessages.ERROR_SEARCH_ZONE });
     }
 }
 
@@ -68,7 +68,7 @@ const update = async (req, res) => {
     try {
         const existing = await searchZoneByID(id);
         if (existing[0].length === 0) {
-            return res.status(404).json({ message: ZONE_NOT_FOUND });
+            return res.status(404).json({ message: zonesMessages.ZONE_NOT_FOUND });
         }
 
         await updateZone(zone, id);
