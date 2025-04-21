@@ -24,11 +24,16 @@ const updateZone = async (zone, id) => {
     );
 };
 
+const getAllZones = async () => {
+    return (await pool).query('SELECT * FROM ZONAS');
+};
+
 
 module.exports = {
     createZone,
     searchZoneByName,
     searchZoneByID,
     deleteZone,
-    updateZone
+    updateZone,
+    getAllZones
 }

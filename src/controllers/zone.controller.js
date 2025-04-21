@@ -1,4 +1,4 @@
-import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone} from '../db/queries/zone.query'
+import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones} from '../db/queries/zone.query'
 import {zonesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -79,6 +79,16 @@ const update = async (req, res) => {
     }
 };
 
+const getAll = async (req, res) => {
+    try {
+      const [results] = await getAllZones();
+      res.status(200).json(results);
+    } catch (error) {
+      console.error('Error al obtener las zonas:', error);
+      res.status(500).json({ message: zonesMessages.GET_ALL_ZONES_ERROR });
+    }
+};
+
 const concatZoneInfo = async (info) =>{
     return{
         nombre: info.name,
@@ -87,5 +97,5 @@ const concatZoneInfo = async (info) =>{
 }
 
 module.exports = {
-    create,concatZoneInfo,remove,getZoneByName,getZoneById, update
+    create,concatZoneInfo,remove,getZoneByName,getZoneById,update,getAll
 }

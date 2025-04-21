@@ -23,6 +23,9 @@ app.use(routes.USER_ROUTER, require('../src/routes/user.routes'));
 app.use(routes.ZONE_ROUTER, require('../src/routes/zone.routes'));
 app.use(routes.CLIENT_ROUTER, require('../src/routes/client.routes'));
 app.use(routes.AUTH_ROUTER, require('../src/routes/auth.routes'));
+app.use(routes.PLAN_ROUTER, require('../src/routes/plan.routes'));
+app.use(routes.STATUS_ROUTER, require('../src/routes/status.routes'));
+app.use(routes.SERVICE_ROUTER, require('../src/routes/service.routes'));
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
