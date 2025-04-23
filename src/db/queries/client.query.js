@@ -8,6 +8,9 @@ const createClient = async (client)=>{
 const searchClientByCC = async (cc) =>{
     return (await pool).query('SELECT * FROM CLIENTE WHERE numero_documento_cliente = ?',cc)
 }
+const getAllClients = async () =>{
+    return (await pool).query('SELECT * FROM CLIENTE')
+}
 
 const deleteClient = async (id)=>{
     return(await pool).query('DELETE FROM CLIENTE WHERE numero_documento_cliente = ?',id)
@@ -22,5 +25,5 @@ const updateClient = async (client, id) => {
 
  
  module.exports = {
-    createClient, searchClientByCC, deleteClient, updateClient
+    createClient, searchClientByCC, deleteClient, updateClient, getAllClients
 }

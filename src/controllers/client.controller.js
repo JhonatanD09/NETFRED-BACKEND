@@ -1,4 +1,4 @@
-import {createClient, searchClientByCC, deleteClient, updateClient} from '../db/queries/client.query'
+import {createClient, searchClientByCC, deleteClient, updateClient, getAllClients} from '../db/queries/client.query'
 import {clientsMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -60,6 +60,17 @@ const remove = async(req,res)=>{
     }
 }
 
+const getAll = async(req,res)=>{
+    try{
+        const result = await getAllClients()
+        console.log(result)
+        res.status(200).json(result[0])
+    }catch{
+        res.status(404).json({ message: clientsMessages.NO_CLIENTS })
+    }
+    
+}
+
 const update = async (req, res) => {
     const id = req.params.id;
     const client = await concatClientInfo(req.body);
@@ -79,5 +90,5 @@ const update = async (req, res) => {
 };
 
 module.exports = {
-    create,concatClientInfo, getClientById, remove, update
+    create,concatClientInfo, getClientById, remove, update, getAll
 }

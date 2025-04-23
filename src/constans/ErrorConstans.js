@@ -64,7 +64,8 @@ export const clientsMessages = {
     CLIENT_NOT_DELETED:'El Cliente no se ha eliminado',
     ERROR_SEARCH_CLIENT: 'Error al buscar el Cliente',
     CLIENT_UPDATED: 'Cliente actualizado correctamente',
-    CLIENT_NOT_UPDATED: 'Error al actualizar el Cliente'
+    CLIENT_NOT_UPDATED: 'Error al actualizar el Cliente',
+    NO_CLIENTS : 'No se encontraton clientes'
 }
 
 export const valideRolesMessages = {
