@@ -63,7 +63,6 @@ const remove = async(req,res)=>{
 const getAll = async(req,res)=>{
     try{
         const result = await getAllClients()
-        console.log(result)
         res.status(200).json(result[0])
     }catch{
         res.status(404).json({ message: clientsMessages.NO_CLIENTS })
