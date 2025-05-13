@@ -9,6 +9,7 @@ const create = async (req,res) =>{
     }
     else{
         try{
+            console.log(client)
             await createClient(client)
             res.status(201).json({message: clientsMessages.CLIENT_ADD})
         }catch{
@@ -25,7 +26,7 @@ const concatClientInfo = async (info) =>{
         celular : info.phoneNumber,
         direccion : info.address,
         correo : info.mail,
-        fecha_inscripcion: info.date,
+        fecha_inscripcion: new Date(),
         id_estado : info.id_state
     }
 }
