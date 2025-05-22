@@ -18,8 +18,8 @@ const deleteEstado = async (id)=>{
 
 const updateEstado = async (estado, id) => {
     return (await pool).query(
-        'UPDATE ESTADO SET nombre_estado = ? WHERE id_estado = ?',
-        [estado.nombre_estado, id]
+        'UPDATE ESTADO SET nombre_estado = ?, tabla_referencia = ? WHERE id_estado = ?',
+        [estado.nombre_estado, estado.tabla_referencia, id]
     );
 };
 

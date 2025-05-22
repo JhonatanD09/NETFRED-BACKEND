@@ -84,7 +84,8 @@ const update = async (req, res) => {
 
 const concatStatusInfo = async (info) =>{
     return{
-        nombre_estado: info.name
+        nombre_estado: info.name,
+        tabla_referencia: info.tabla_referencia
     }
 }
 

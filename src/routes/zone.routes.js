@@ -10,7 +10,7 @@ router.get('/nombre/:nombre', [verifyToken],[verifyAdminRole], controller.getZon
 router.get('/id/:id', [verifyToken],[verifyAdminRole], controller.getZoneById);
 router.put('/:id', [verifyToken], [verifyAdminRole], controller.update);
 router.get('/', [verifyToken], [verifyAdminRole], controller.getAll);
-
+router.get('/clientes/:nombre', [verifyToken], [verifyAdminRole], controller.getClientsByZoneName);
 
 
 module.exports = router

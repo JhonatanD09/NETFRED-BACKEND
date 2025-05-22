@@ -14,7 +14,9 @@ export const zonesMessages = {
     ERROR_SEARCH_ZONE: 'Error al buscar la zona',
     ZONE_UPDATED: 'Zona actualizada correctamente',
     ZONE_NOT_UPDATED: 'Error al actualizar la zona',
-    GET_ALL_ZONES_ERROR: 'Error al obtener todas las zonas'
+    GET_ALL_ZONES_ERROR: 'Error al obtener todas las zonas',
+    ZONE_CLIENTS_NOT_FOUND: 'No se encontraron clientes en la zona especificada.',
+    ZONE_CLIENTS_FETCH_ERROR: 'Error al buscar clientes por zona.'
 }
 
 export const planesMessages = {
@@ -72,3 +74,19 @@ export const valideRolesMessages = {
     NO_ROLE_REQUIRED: 'No cuentas con los permisos para acceder a este recurso'
 }
 
+export const contratoMessages = {
+    CONTRATO_ADD: "Contrato creado correctamente",
+    ERROR_CONTRATO_ADD: "Error al crear el contrato",
+    CONTRATO_BY_START_DATE_NOT_FOUND: "No se encontraron contratos con esa fecha de inicio",
+    ERROR_SEARCH_CONTRATO_BY_START_DATE: "Error al buscar contratos por fecha",
+    SEARCH_CONTRATO_BY_STATUS_NOT_FOUND: "No se encontraron contratos con ese estado.",
+    ERROR_SEARCH_CONTRATO_BY_STATUS: "Error al buscar contrato por estado.",
+    SEARCH_CONTRATO_BY_ID_CLIENT_NOT_FOUND: "No se encontraron contratos para ese cliente.",
+    ERROR_SEARCH_CONTRATO_BY_ID_CLIENT: "Error al buscar contrato por cliente.",
+    CONTRATO_NOT_FOUND: "Contrato no encontrado",
+    CONTRATO_DELETED: "Contrato eliminado correctamente",
+    CONTRATO_NOT_DELETED: "Error al eliminar el contrato",
+    CONTRATO_UPDATED: "Contrato actualizado correctamente",
+    CONTRATO__NOT_UPDATED: "Error al actualizar el contrato",
+    ERROR_GET_ALL_CONTRATO: "Error al obtener los contratos"
+}

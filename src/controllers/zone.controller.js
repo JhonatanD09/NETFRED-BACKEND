@@ -1,4 +1,4 @@
-import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones} from '../db/queries/zone.query'
+import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones, getClientesByZoneName } from '../db/queries/zone.query'
 import {zonesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -96,6 +96,22 @@ const concatZoneInfo = async (info) =>{
     }
 }
 
+const getClientsByZoneName = async (req, res) => {
+    const nombreZona = req.params.nombre;
+
+    try {
+        const clientes = await getClientesByZoneName(nombreZona);
+        if (clientes.length > 0) {
+            res.status(200).json(clientes);
+        } else {
+            res.status(404).json({ message: zonesMessages.ZONE_CLIENTS_NOT_FOUND });
+        }
+    } catch (error) {
+        console.error("Error al buscar clientes por zona:", error);
+        res.status(500).json({ message: zonesMessages.ZONE_CLIENTS_FETCH_ERROR });
+    }
+};
+
 module.exports = {
-    create,concatZoneInfo,remove,getZoneByName,getZoneById,update,getAll
+    create,concatZoneInfo,remove,getZoneByName,getZoneById,update,getAll,getClientsByZoneName
 }

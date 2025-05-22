@@ -14,8 +14,8 @@ const deleteService = async (id)=>{
 
 const updateService = async (service, id) => {
     return (await pool).query(
-        'UPDATE SERVICIO SET id_zona = ?, id_plan = ?, id_estado = ? WHERE id_servicio = ?',
-        [service.id_zona, service.id_plan,service.id_estado, id]
+        'UPDATE SERVICIO SET id_zona = ?, id_plan = ?, id_estado = ?, precio = ? WHERE id_servicio = ?',
+        [service.id_zona, service.id_plan,service.id_estado, service.precio, id]
     );
 };
 

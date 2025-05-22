@@ -28,6 +28,27 @@ const getAllZones = async () => {
     return (await pool).query('SELECT * FROM ZONAS');
 };
 
+const getClientesByZoneName = async (nombreZona) => {
+    const [rows] = await (await pool).query(`
+        SELECT 
+            c.nombres_completos,
+            c.numero_documento_cliente,
+            c.correo,
+            c.direccion,
+            z.nombre AS nombre_zona,
+            co.id_contrato,
+            co.fecha_inicio
+        FROM cliente c
+        JOIN contrato co ON c.numero_documento_cliente = co.numero_documento_cliente
+        JOIN servicio s ON co.id_servicio = s.id_servicio
+        JOIN zonas z ON s.id_zona = z.id_zona
+        WHERE z.nombre = ?
+    `, [nombreZona]);
+
+    return rows;
+};
+
+
 
 module.exports = {
     createZone,
@@ -35,5 +56,6 @@ module.exports = {
     searchZoneByID,
     deleteZone,
     updateZone,
-    getAllZones
+    getAllZones,
+    getClientesByZoneName
 }

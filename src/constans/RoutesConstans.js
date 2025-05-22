@@ -5,5 +5,6 @@ export const routes = {
     CLIENT_ROUTER: '/api/v1/client',
     PLAN_ROUTER: '/api/v1/plan',
     STATUS_ROUTER: '/api/v1/estado',
-    SERVICE_ROUTER: '/api/v1/servicio'
+    SERVICE_ROUTER: '/api/v1/servicio',
+    CONTRATO_ROUTER: '/api/v1/contrato'
 }

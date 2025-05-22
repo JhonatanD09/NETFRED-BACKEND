@@ -66,7 +66,8 @@ const concatServiceInfo = async (info) =>{
     return{
         id_zona: info.zoneId,
         id_plan: info.planId,
-        id_estado: info.stateId
+        id_estado: info.stateId,
+        precio: info.precio
     }
 }
 
