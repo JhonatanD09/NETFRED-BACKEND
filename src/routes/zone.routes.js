@@ -11,6 +11,7 @@ router.get('/id/:id', [verifyToken],[verifyAdminRole], controller.getZoneById);
 router.put('/:id', [verifyToken], [verifyAdminRole], controller.update);
 router.get('/', [verifyToken], [verifyAdminRole], controller.getAll);
 router.get('/clientes/:nombre', [verifyToken], [verifyAdminRole], controller.getClientsByZoneName);
+router.get('/resumen', [verifyToken], [verifyAdminRole], controller.getResumenPorZona);
 
 
 module.exports = router

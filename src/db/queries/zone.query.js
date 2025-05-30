@@ -48,6 +48,20 @@ const getClientesByZoneName = async (nombreZona) => {
     return rows;
 };
 
+const getResumenZona = async () => {
+    const query = `
+        SELECT 
+            z.id_zona,
+            z.nombre AS nombre_zona,
+            COUNT(DISTINCT s.id_servicio) AS cantidad_servicios,
+            COUNT(DISTINCT s.id_plan) AS cantidad_planes
+        FROM zonas z
+        LEFT JOIN servicio s ON z.id_zona = s.id_zona
+        GROUP BY z.id_zona, z.nombre;
+    `;
+    return (await pool).query(query);
+};
+
 
 
 module.exports = {
@@ -57,5 +71,6 @@ module.exports = {
     deleteZone,
     updateZone,
     getAllZones,
-    getClientesByZoneName
+    getClientesByZoneName,
+    getResumenZona
 }

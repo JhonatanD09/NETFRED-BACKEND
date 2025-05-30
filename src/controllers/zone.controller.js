@@ -1,4 +1,4 @@
-import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones, getClientesByZoneName } from '../db/queries/zone.query'
+import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones, getClientesByZoneName, getResumenZona } from '../db/queries/zone.query'
 import {zonesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -112,6 +112,17 @@ const getClientsByZoneName = async (req, res) => {
     }
 };
 
+const getResumenPorZona = async (req, res) => {
+    try {
+        const [result] = await getResumenZona();
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error al obtener resumen de zonas:", error);
+        res.status(500).json({ message: "Error al obtener el resumen de zonas." });
+    }
+};
+
+
 module.exports = {
-    create,concatZoneInfo,remove,getZoneByName,getZoneById,update,getAll,getClientsByZoneName
+    create,concatZoneInfo,remove,getZoneByName,getZoneById,update,getAll,getClientsByZoneName,getResumenPorZona
 }
