@@ -9,8 +9,8 @@ const create = async (req,res) =>{
     }
     else{
         try{
-            await createZone(zone)
-            res.status(201).json({message: zonesMessages.ZONE_ADD})
+            var idZone = await createZone(zone)
+            res.status(201).json({message: zonesMessages.ZONE_ADD , value: idZone})
         }catch{
             res.status(404).json({message: zonesMessages.ZONE_NOT_ADD})
         }

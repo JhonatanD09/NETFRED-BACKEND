@@ -1,7 +1,8 @@
 import pool from '../database'
 
-const createService = async (servicio)=>{
-    return (await pool).query('INSERT INTO SERVICIO SET ?',servicio)
+const createService = async (servicio) => {
+    const [result] = await (await pool).query('INSERT INTO SERVICIO SET ?', servicio);
+    return { id_servicio: result.insertId, ...servicio };
 }
 
 const searchServiceByID = async (id)=>{
@@ -23,11 +24,18 @@ const getAllService = async () => {
     return (await pool).query('SELECT * FROM SERVICIO');
 };
   
+const getAllServiceByZone = async (idZona) => {
+    if (!idZona) {
+        throw new Error('Zone ID is required');
+    }
+    return (await pool).query('SELECT * FROM SERVICIO WHERE id_zona = ?', [idZona]);
+};
 
 module.exports = {
     createService,
     searchServiceByID,
     deleteService,
     updateService,
-    getAllService
+    getAllService,
+    getAllServiceByZone,
 }
