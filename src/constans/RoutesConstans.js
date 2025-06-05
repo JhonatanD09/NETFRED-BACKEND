@@ -6,5 +6,7 @@ export const routes = {
     PLAN_ROUTER: '/api/v1/plan',
     STATUS_ROUTER: '/api/v1/estado',
     SERVICE_ROUTER: '/api/v1/servicio',
-    CONTRATO_ROUTER: '/api/v1/contrato'
+    CONTRATO_ROUTER: '/api/v1/contrato',
+    CUENTACOBRO_ROUTER: '/api/v1/cuenta_cobro',
+    METODOPAGO_ROUTER: '/api/v1/metodo_pago'
 }

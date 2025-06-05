@@ -90,3 +90,22 @@ export const contratoMessages = {
     CONTRATO__NOT_UPDATED: "Error al actualizar el contrato",
     ERROR_GET_ALL_CONTRATO: "Error al obtener los contratos"
 }
+
+export const cuentaCobroMessages = {
+    CUENTA_ADD: "Cuenta de cobro creada correctamente",
+    ERROR: "Error",
+    CUENTA_NO_ENCONTRADA: "Cuenta de cobro no encontrada",
+    CUENTA_UPDATE: "Cuenta de cobro actualizada correctamente",
+    CUENTA_DELETED: "Cuenta de cobro eliminada correctamente",
+    CUENTACOBRO_NOT_FOUND: "Cuenta de cobro no encontrada"
+}
+
+export const metodoPagoMessages = {
+    METODOPAGO_ADD: "Metodo de pago creado correctamente",
+    ERROR: "Error",
+    METODOPAGO_NO_ENCONTRADO: "Metodo de pago no encontrado",
+    METODOPAGO_UPDATE: "Metodo de pago actualizado correctamente",
+    METODOPAGO_DELETED: "Metodo de pago eliminado correctamente",
+    METODOPAGO_EXISTENTE: "Ya existe un metodo de pago con ese nombre",
+    METODOPAGO_NOT_FOUND: "Metodo de pago no encontrado"
+}
