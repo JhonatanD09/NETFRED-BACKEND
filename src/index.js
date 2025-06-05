@@ -27,6 +27,7 @@ app.use(routes.PLAN_ROUTER, require('../src/routes/plan.routes'));
 app.use(routes.STATUS_ROUTER, require('../src/routes/status.routes'));
 app.use(routes.SERVICE_ROUTER, require('../src/routes/service.routes'));
 app.use(routes.CONTRATO_ROUTER, require('../src/routes/contrato.routes'));
+app.use('/api/v1/invoice', require('../src/routes/invoice.routes'));
 app.use(routes.CUENTACOBRO_ROUTER, require('../src/routes/collectionAccount.routes'));
 app.use(routes.METODOPAGO_ROUTER, require('../src/routes/metodoPago.routes'));
 
