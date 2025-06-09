@@ -23,7 +23,8 @@ const generarPDF = (id, datos) => {
         const originalX = doc.x;
         const originalY = doc.y;
 
-        doc.image('src/services/assets/download.png', 10, 10, { width: 300, height: 150 });
+        doc.fontSize(8)
+        doc.image('src/services/assets/logo.jpg', 75, 10, { width: 200, height: 120 });
 
         const tabX = originalX + 300;
 
@@ -31,41 +32,105 @@ const generarPDF = (id, datos) => {
         doc.text('Cra 3 #5/32', tabX, doc.y);
         doc.text('Centro La Belleza, Santander', tabX, doc.y);
 
-        doc.moveDown();
+        doc.moveDown(2);
+        doc.x = originalX;
+
+        doc.moveDown(2);
+
         doc.x = originalX;
 
         doc.moveDown();
-        doc.text(`Cuenta de cobro: `, {continued: true})
+
+        const infoTabla = [
+            ['Cod. Pago', datos.cuenta],
+            ['Nombre', datos.nombre],
+            ['Dirección', datos.direccion],
+            ['Celular', datos.celular],
+            ['Periodo', datos.periodo],
+        ];
+
+
+        dibujarTablaInfo({ doc, data: infoTabla, width : 200 });
+
+        const infoTablaFechas = [
+            ['Fecha', '10/02/2025'],
+            ['Periodo de facturacion', '01/02/2025 - 02/02/2025'],
+            ['Pago oportuno', '25/02/2025'],
+            ['Fecha suspencion', '06/03/2025'],
+            ['Telefonos', '3173632087 - 3209419285'],
+        ];
+
+
+        dibujarTablaInfo({ doc, data: infoTablaFechas, width : 240 , xInit : 300, yInit: 146 });
+
+        doc.x = originalX;
+        doc.moveDown()
+
+        dibujarTablaMovimientos({ doc, data: datos })
+        doc.x = originalX;
+
+        const datosResumen = [
+            'SUBTOTAL', 45000,
+            'IVA', 0,
+            'DESCUENTOS', 0,
+            'TOTAL', 45000
+        ];
+
+        const startX = 306; // posición X donde empieza la tabla
+
+        dibujarTablaGenerica({ doc, rows: 4, columns: 2, data: datosResumen, startX, width: 234 });
+        //EL GRACIAS
+        doc
+            .save()
+            .fillColor('#cceaf7')
+            .rect(71, 402, 234, 40)
+            .fill()
+            .restore();
+        doc.
+            font('Helvetica-BoldOblique')
+            .text('Gracias por su confianza', 110, 416)
+
+        //METODOS DE PAGO
+        doc
+            .rect(71, 441, 235, 79)
+            .strokeColor('black')
+            .stroke();
+
+        doc.
+            font('Helvetica-BoldOblique')
+            .text('REALIZA TUS PAGOS MÁS FÁCIL Y RÁPIDO A TRAVÉS DE: ', 72, 445)
+
+        doc.
+            font('Helvetica-BoldOblique')
+            .fillColor('#3552e2')
+            .text('NEQUI: 3144316001', 72, 498)
+            .text('DAVIPLATA: 3128740072', 72, 508)
+
+        //LINEA DE ATENCION AL CLIENTE 
+        doc
+            .rect(306, 481, 234, 39)
+            .strokeColor('black')
+            .stroke();
+        doc.fontSize(10)
+        doc
+            .fillColor('black')
             .font('Helvetica-Bold')
-            .text(` ${datos.cuenta}         `, {continued: true})
-            .font('Helvetica')
-            .text('FECHA: 10/02/2025', originalX + 200)
+            .text('LÍNEA DE ATENCIÓN AL CLIENTE:', 336, 492)
+            .text('3144316001', 386, 505)
 
-        doc.x = originalX;
+        //separador
+        doc.y = 525
+        doc.x = originalX
 
-        doc.moveDown();
-        doc.text(`Nombre usuario: ${datos.nombre}`);
-        doc.text(`Cédula: ${datos.cedula}`);
-        doc.text(`Dirección: ${datos.direccion}`);
-        doc.text(`Celular: ${datos.celular}`);
+        doc
+            .moveTo(0, doc.y + 20)                  
+            .lineTo(doc.page.width, doc.y + 20)    
+            .dash(5, { space: 5 })
+            .stroke();
 
-        doc.moveDown();
-        doc.text(`Periodo de facturación: ${datos.periodo}`);
-        doc.text(`Pago oportuno: ${datos.pagoOportuno}`);
-        doc.text(`Fecha de suspensión: ${datos.suspension}`);
+        //desprendible 
 
-        doc.moveDown();
-        doc.text('Detalle de cobro:', { underline: true });
-        doc.text(`Descripción: ${datos.descripcion}`);
-        doc.text(`Mes: ${datos.mes}`);
-        doc.text(`Valor: $${datos.valor.toLocaleString()}`);
 
-        doc.moveDown();
-        doc.text(`Total: $${datos.valor.toLocaleString()}`, { bold: true });
-
-        doc.moveDown();
-        doc.fontSize(16).text('CANCELADO', { align: 'center' });
-        doc.fontSize(10).text(`Fecha cancelación: ${datos.fechaCancelacion}`, { align: 'center' });
 
         doc.end();
         stream.on('finish', () => {
@@ -74,6 +139,165 @@ const generarPDF = (id, datos) => {
     });
 }
 
+function dibujarTablaInfo({ doc, data = [], width = null, xInit = null, yInit = null }) {
+    const startY = yInit ?? doc.y ?? 50;
+    const marginLeft = xInit ?? doc.page.margins.left ?? 30;
+    const usableWidth = width ?? (doc.page.width - doc.page.margins.left - doc.page.margins.right);
+
+    const colCount = 2;
+    const columnWidth = usableWidth / colCount;
+    const rowHeight = 20;
+    let y = startY;
+
+    data.forEach(([label, value]) => {
+        doc
+            .font('Helvetica-Bold')
+            .fillColor('#cceaf7')
+            .rect(marginLeft, y, columnWidth, rowHeight)
+            .fill()
+            .fillColor('black')
+            .text(label, marginLeft + 5, y + 7, {
+                width: columnWidth - 10,
+                align: 'left',
+            });
+
+        doc
+            .strokeColor('black')
+            .rect(marginLeft, y, columnWidth, rowHeight)
+            .stroke();
+
+        doc
+            .font('Helvetica')
+            .rect(marginLeft + columnWidth, y, columnWidth, rowHeight)
+            .stroke()
+            .text(value, marginLeft + columnWidth + 5, y + 7, {
+                width: columnWidth - 10,
+                align: 'left',
+            });
+
+        y += rowHeight;
+    });
+
+    doc.moveDown();
+}
+
+function dibujarTablaMovimientos({ doc, data, width = null }) {
+    const marginLeft = doc.page.margins.left || 30;
+    const usableWidth = width || (doc.page.width - doc.page.margins.left - doc.page.margins.right);
+    const columnCount = 3;
+    const rowHeight = 20;
+    let y = doc.y || 50;
+
+    const columnWidthsPercent = [0.5, 0.25, 0.25];
+    const columnWidths = columnWidthsPercent.map(p => p * usableWidth);
+
+    const headers = ['Descripción', 'Cantidad', 'Valor'];
+
+    headers.forEach((header, i) => {
+        const x = marginLeft + columnWidths.slice(0, i).reduce((a, b) => a + b, 0); // sum ancho columnas previas
+
+        doc
+            .save()
+            .fillColor('#4fb7e1')
+            .rect(x, y, columnWidths[i], rowHeight)
+            .fill()
+            .restore();
+
+        doc
+            .fillColor('black')
+            .font('Helvetica-Bold')
+            .text(header, x + 5, y + 7, {
+                width: columnWidths[i] - 10,
+                align: 'left',
+            });
+
+        doc
+            .rect(x, y, columnWidths[i], rowHeight)
+            .strokeColor('black')
+            .stroke();
+    });
+
+    y += rowHeight;
+
+    const filas = [];
+    filas.push([
+        data.descripcion || '',
+        data.mes || '',
+        data.valor?.toLocaleString('es-CO') || ''
+    ]);
+
+    for (let i = 1; i < 6; i++) {
+        filas.push(['Saldo anterior', '', '']);
+    }
+
+    filas.forEach(row => {
+        row.forEach((cell, i) => {
+            const x = marginLeft + columnWidths.slice(0, i).reduce((a, b) => a + b, 0);
+
+            doc
+                .rect(x, y, columnWidths[i], rowHeight)
+                .strokeColor('black')
+                .stroke();
+
+            doc
+                .fillColor('black')
+                .font('Helvetica')
+                .text(cell, x + 5, y + 7, {
+                    width: columnWidths[i] - 10,
+                    align: 'left',
+                });
+        });
+        y += rowHeight;
+    });
+
+    doc.moveDown();
+}
+
+
+function dibujarTablaGenerica({ doc, rows, columns, data, startX, startY = null, width = null }) {
+    const x = startX;
+    let yStart = startY !== null ? startY : doc.y;
+    yStart = yStart + 4
+    const usableWidth = width || (doc.page.width - doc.page.margins.left - doc.page.margins.right - x);
+    const columnWidth = usableWidth / columns;
+    const rowHeight = 20;
+
+    let y = yStart;
+
+    let dataIndex = 0;
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < columns; col++) {
+            const cellText = data[dataIndex] !== undefined ? data[dataIndex].toString() : '';
+
+            const cellX = x + col * columnWidth;
+            const cellY = y;
+            doc
+                .save()
+                .fillColor('white')
+                .rect(cellX, cellY, columnWidth, rowHeight)
+                .fill()
+                .restore();
+            doc
+                .rect(cellX, cellY, columnWidth, rowHeight)
+                .strokeColor('black')
+                .stroke();
+            doc
+                .fillColor('black')
+                .font('Helvetica')
+                .text(cellText, cellX + 5, cellY + 7, {
+                    width: columnWidth - 10,
+                    align: 'left',
+                    ellipsis: true,
+                });
+
+            dataIndex++;
+        }
+        y += rowHeight;
+    }
+
+    doc.y = y;
+}
 
 module.exports = {
     generarPDF
