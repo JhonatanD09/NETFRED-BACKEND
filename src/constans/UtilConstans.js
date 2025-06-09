@@ -4,5 +4,5 @@ export const ROLES = {
 
 export const tokenConstans = {
     NO_TOKEN :  'No token provided',
-    NO_USER : 'User not found'
+    NO_USER : 'Token no Valido'
 }

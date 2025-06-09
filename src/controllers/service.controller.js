@@ -1,4 +1,4 @@
-import {createService, searchServiceByID, deleteService, updateService, getAllService} from '../db/queries/service.query'
+import {createService, searchServiceByID, deleteService, updateService, getAllService, getServiceByIdQuery ,checkContractsByServiceId} from '../db/queries/service.query'
 import {planesMessages, servicesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -44,7 +44,7 @@ const remove = async(req,res)=>{
     }
 }
 
-const update = async (req, res) => {
+/*const update = async (req, res) => {
     const id = req.params.id;
     const service = await concatServiceInfo(req.body);
 
@@ -60,7 +60,38 @@ const update = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: servicesMessages.SERVICE_NOT_UPDATED });
     }
+};*/
+
+const update = async (req, res) => {
+    const id = req.params.id;
+    const service = await concatServiceInfo(req.body);
+
+    try {
+        const existing = await searchServiceByID(id);
+        if (existing[0].length === 0) {
+            return res.status(404).json({ message: servicesMessages.SERVICE_NOT_FOUND });
+        }
+
+        // Verificamos si existen contratos activos asociados al servicio
+        const [activeContracts] = await checkContractsByServiceId(id);
+
+        // Si hay contratos activos y se está intentando cambiar el estado
+        const currentState = existing[0][0].id_estado;
+        if (activeContracts.length > 0 && service.id_estado !== currentState) {
+            return res.status(400).json({
+                message: 'No se puede modificar el estado del servicio porque tiene contratos activos asociados.'
+            });
+        }
+
+        await updateService(service, id);
+        res.status(200).json({ message: servicesMessages.SERVICE_UPDATED });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: servicesMessages.SERVICE_NOT_UPDATED });
+    }
 };
+
+
 
 const concatServiceInfo = async (info) =>{
     return{

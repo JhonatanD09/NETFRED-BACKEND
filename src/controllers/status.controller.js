@@ -4,10 +4,10 @@ import {statusMessages} from '../constans/ErrorConstans'
 const create = async (req,res) =>{
     const status = await concatStatusInfo(req.body)
     const statusByName = await searchEstadoByName(status.nombre_estado)
-    if(statusByName[0].length>0){
+    /*if(statusByName[0].length>0){
         res.status(404).json({message: statusMessages.STATUS_EXIST})
     }
-    else{
+    else{*/
         try{
             await createEstado(status)
             res.status(201).json({message: statusMessages.STATUS_ADD})
@@ -15,7 +15,7 @@ const create = async (req,res) =>{
             console.error(error);
             res.status(404).json({message: statusMessages.STATUS_NOT_ADD})
         }
-    }
+    //}
 }
 
 const getStatusByName = async (req,res) =>{

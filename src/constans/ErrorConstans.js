@@ -54,7 +54,8 @@ export const servicesMessages = {
     SERVICE_NOT_DELETED:'El servicio no se ha eliminado',
     SERVICE_UPDATED: 'Servicio actualizado correctamente',
     SERVICE_NOT_UPDATED: 'Error al actualizar el servicio',
-    GET_ALL_SERVICE_ERROR: 'Error al obtener todos los servicios'
+    GET_ALL_SERVICE_ERROR: 'Error al obtener todos los servicios',
+    SERVICE_HAS_CONTRACTS: 'No puede cambiar el estado del servicio porque cuenta con contratos activos'
 }
 
 export const clientsMessages = {
