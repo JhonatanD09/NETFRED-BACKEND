@@ -1,4 +1,4 @@
-/*const pdfGenerateService = require('../services/pdfGenerator.service')
+const pdfGenerateService = require('../services/pdfGenerator.service')
 
 const datos = {
   cuenta: '55',
@@ -32,4 +32,4 @@ const generate = async (req, res) => {
 
 module.exports = {
   generate  
-} */
+} 
