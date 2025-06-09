@@ -1,14 +1,14 @@
-import {createService, searchServiceByID, deleteService, updateService, getAllService, getServiceByIdQuery ,checkContractsByServiceId} from '../db/queries/service.query'
+import {createService, searchServiceByID, deleteService, updateService, getAllService, getServiceByIdQuery ,checkContractsByServiceId,getAllServiceByZone} from '../db/queries/service.query'
 import {planesMessages, servicesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
     const service = await concatServiceInfo(req.body)
     try{
-        await createService(service)
-        res.status(201).json({message: servicesMessages.SERVICE_ADD})
+        const result = await createService(service)
+        res.status(201).json({service: result,message: servicesMessages.SERVICE_ADD})
     }catch(error){
         console.error(error);
-        res.status(404).json({message: servicesMessages.SERVICE_NOT_ADD})
+        res.status(error.status).json({message: servicesMessages.SERVICE_NOT_ADD})
     }
 }
 
@@ -98,7 +98,7 @@ const concatServiceInfo = async (info) =>{
         id_zona: info.zoneId,
         id_plan: info.planId,
         id_estado: info.stateId,
-        precio: info.precio
+        precio: info.price
     }
 }
 
@@ -113,6 +113,17 @@ const getAll = async (req, res) => {
 };
   
 
+const getAllServiceByZones = async (req, res) => {
+    const idZona = req.params.id;
+    try {
+        const [results] = await getAllServiceByZone(idZona);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error al obtener los servicios por zona:', error);
+        res.status(500).json({ message: servicesMessages.GET_ALL_SERVICE_BY_ZONE_ERROR });
+    }
+};
+
 module.exports = {
-    create,concatServiceInfo,getServiceById,remove,update,getAll
+    create,concatServiceInfo,getServiceById,remove,update,getAll,getAllServiceByZones
 }

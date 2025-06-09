@@ -1,8 +1,8 @@
 import pool from '../database'
 
-const createZone = async (zone)=>{
-    console.log("la zona", zone);
-    return (await pool).query('INSERT INTO ZONAS SET ?',zone)
+const createZone = async (zone) => {
+    const [result] = await (await pool).query('INSERT INTO ZONAS SET ?', zone);
+    return result.insertId;
 }
 
 const searchZoneByName = async (name)=>{
@@ -53,6 +53,7 @@ const getResumenZona = async () => {
         SELECT 
             z.id_zona,
             z.nombre AS nombre_zona,
+            z.detalles AS detalles_zona,
             COUNT(DISTINCT s.id_servicio) AS cantidad_servicios,
             COUNT(DISTINCT s.id_plan) AS cantidad_planes
         FROM zonas z

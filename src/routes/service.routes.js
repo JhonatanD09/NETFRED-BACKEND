@@ -9,8 +9,7 @@ router.get('/id/:id', [verifyToken],[verifyAdminRole], controller.getServiceById
 router.delete('/:id', [verifyToken],[verifyAdminRole], controller.remove);
 router.put('/:id', [verifyToken], [verifyAdminRole], controller.update);
 router.get('/', [verifyToken], [verifyAdminRole], controller.getAll);
-
-
+router.get('/zona/:id', [verifyToken], [verifyAdminRole], controller.getAllServiceByZones);
 
 
 module.exports = router
