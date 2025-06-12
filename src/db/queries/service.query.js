@@ -13,6 +13,10 @@ const deleteService = async (id)=>{
     return(await pool).query('DELETE FROM SERVICIO WHERE id_servicio = ?',id)
 }
 
+const desactiveService = async (id) => {
+    return (await pool).query('UPDATE SERVICIO SET id_estado = 2 WHERE id_servicio = ?', [id]);
+}
+
 const updateService = async (service, id) => {
     return (await pool).query(
         'UPDATE SERVICIO SET id_zona = ?, id_plan = ?, id_estado = ?, precio = ? WHERE id_servicio = ?',
@@ -65,4 +69,5 @@ module.exports = {
     getServiceByIdQuery,
     checkContractsByServiceId,
     getAllServiceByZone,
+    desactiveService,
 }

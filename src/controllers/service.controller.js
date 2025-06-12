@@ -1,4 +1,4 @@
-import {createService, searchServiceByID, deleteService, updateService, getAllService, getServiceByIdQuery ,checkContractsByServiceId,getAllServiceByZone} from '../db/queries/service.query'
+import {createService, searchServiceByID, desactiveService, updateService, getAllService, getServiceByIdQuery ,checkContractsByServiceId,getAllServiceByZone} from '../db/queries/service.query'
 import {planesMessages, servicesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -26,23 +26,20 @@ const getServiceById = async (req,res) =>{
     }
 }
 
-const remove = async(req,res)=>{
-    const id = req.params.id
-    const service = await searchServiceByID(id)
-    if (service[0].length === 0) {
-        res.status(404).json({ message: servicesMessages.SERVICE_NOT_FOUND })
+const remove = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const service = await searchServiceByID(id);
+        if (service[0].length === 0) {
+            return res.status(404).json({ message: servicesMessages.SERVICE_NOT_FOUND });
+        }        
+        await desactiveService(id);
+        res.status(200).json({ message: servicesMessages.SERVICE_DELETED });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: servicesMessages.SERVICE_NOT_DELETED });
     }
-    else{
-        try{
-            await deleteService(id)
-            res.status(201).json({ message: servicesMessages.SERVICE_DELETED })
-        }catch(error){
-            console.log(error);
-            
-            res.status(404).json({ message: servicesMessages.SERVICE_NOT_DELETED })
-        }
-    }
-}
+};
 
 /*const update = async (req, res) => {
     const id = req.params.id;
