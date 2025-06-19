@@ -1,7 +1,6 @@
 import pool from '../database'
 
 const createClient = async (client)=>{
-    console.log("el usuario", client)
     return (await pool).query('INSERT INTO CLIENTE SET ?',client)
  }
 

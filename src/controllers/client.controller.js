@@ -1,35 +1,47 @@
 import {createClient, searchClientByCC, deleteClient, updateClient, getAllClients} from '../db/queries/client.query'
 import {clientsMessages} from '../constans/ErrorConstans'
 
-const create = async (req,res) =>{
-    const client = await concatClientInfo(req.body)
-    const clientByCC = await searchClientByCC(client.numero_documento_cliente)
-    if(clientByCC[0].length>0){
-        res.status(404).json({message: clientsMessages.CLIENT_EXIST})
+const create = async (req, res) => {
+    const { cc, fullName, typeDoc, phoneNumber, address, mail, id_state } = req.body;
+    if (
+        !cc ||
+        !fullName ||
+        !typeDoc ||
+        !phoneNumber ||
+        !address ||
+        !mail ||
+        !id_state
+    ) {
+        return res.status(400).json({ message: "Formato de datos incorrecto o campos requeridos faltantes." });
     }
-    else{
-        try{
-            console.log(client)
-            await createClient(client)
-            res.status(201).json({message: clientsMessages.CLIENT_ADD})
-        }catch{
-            res.status(404).json({message: clientsMessages.CLIENT_NOT_ADD})
+
+    const client = await concatClientInfo(req.body);
+    const clientByCC = await searchClientByCC(client.numero_documento_cliente);
+    if (clientByCC[0].length > 0) {
+        res.status(404).json({ message: clientsMessages.CLIENT_EXIST });
+    } else {
+        try {
+            await createClient(client);
+            res.status(201).json({ message: clientsMessages.CLIENT_ADD });
+        } catch (error) {
+            console.error(error);
+            res.status(404).json({ message: clientsMessages.CLIENT_NOT_ADD });
         }
     }
-}
+};
 
-const concatClientInfo = async (info) =>{
-    return{
+const concatClientInfo = async (info) => {
+    return {
         numero_documento_cliente: info.cc,
         nombres_completos: info.fullName,
-        tipo_documento : info.typeDoc,
-        celular : info.phoneNumber,
-        direccion : info.address,
-        correo : info.mail,
+        tipo_documento: info.typeDoc,
+        celular: info.phoneNumber,
+        direccion: info.address,
+        correo: info.mail,
         fecha_inscripcion: new Date(),
-        id_estado : info.id_state
-    }
-}
+        id_estado: info.id_state
+    };
+};
 
 const getClientById = async (req,res) =>{
     const id = req.params.id;
