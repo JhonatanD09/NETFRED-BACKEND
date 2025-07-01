@@ -1,4 +1,4 @@
-import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones, getClientesByZoneName, getResumenZona } from '../db/queries/zone.query'
+import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones, getClientesByZoneName, getClientesByZoneId, getResumenZona } from '../db/queries/zone.query'
 import {zonesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -22,12 +22,12 @@ const getZoneByName = async (req,res) =>{
     try{
         const result = await searchZoneByName(nombre);
         if (result[0].length > 0) {
-            res.status(201).json(result[0][0]);
+            res.status(200).json(result[0][0]);
         } else{
             res.status(404).json({ message: zonesMessages.ZONE_NOT_FOUND });
         }
     } catch (error){
-        res.status(404).json({ message: zonesMessages.ERROR_SEARCH_ZONE });
+        res.status(500).json({ message: zonesMessages.ERROR_SEARCH_ZONE });
     }
 }
 
@@ -36,12 +36,12 @@ const getZoneById = async (req,res) =>{
     try{
         const result = await searchZoneByID(id);
         if (result[0].length > 0) {
-            res.status(201).json(result[0][0]);
+            res.status(200).json(result[0][0]);
         } else{
             res.status(404).json({ message: zonesMessages.ZONE_NOT_FOUND });
         }
     } catch (error){
-        res.status(404).json({ message: zonesMessages.ERROR_SEARCH_ZONE });
+        res.status(500).json({ message: zonesMessages.ERROR_SEARCH_ZONE });
     }
 }
 
@@ -99,16 +99,46 @@ const concatZoneInfo = async (info) =>{
 const getClientsByZoneName = async (req, res) => {
     const nombreZona = req.params.nombre;
 
+    // Agregar headers para evitar caché
+    res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
+
     try {
         const clientes = await getClientesByZoneName(nombreZona);
-        if (clientes.length > 0) {
-            res.status(200).json(clientes);
+        if (clientes && clientes.length > 0) {
+            return res.status(200).json(clientes);
         } else {
-            res.status(404).json({ message: zonesMessages.ZONE_CLIENTS_NOT_FOUND });
+            return res.status(404).json({ message: zonesMessages.ZONE_CLIENTS_NOT_FOUND });
         }
     } catch (error) {
         console.error("Error al buscar clientes por zona:", error);
-        res.status(500).json({ message: zonesMessages.ZONE_CLIENTS_FETCH_ERROR });
+        return res.status(500).json({ message: zonesMessages.ZONE_CLIENTS_FETCH_ERROR });
+    }
+};
+
+const getClientsByZoneId = async (req, res) => {
+    const idZona = req.params.id;
+
+    // Agregar headers para evitar caché
+    res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
+
+    try {
+        const clientes = await getClientesByZoneId(idZona);
+        if (clientes && clientes.length > 0) {
+            return res.status(200).json(clientes);
+        } else {
+            return res.status(404).json({ message: zonesMessages.ZONE_CLIENTS_NOT_FOUND });
+        }
+    } catch (error) {
+        console.error("Error al buscar clientes por ID de zona:", error);
+        return res.status(500).json({ message: zonesMessages.ZONE_CLIENTS_FETCH_ERROR });
     }
 };
 
@@ -124,5 +154,5 @@ const getResumenPorZona = async (req, res) => {
 
 
 module.exports = {
-    create,concatZoneInfo,remove,getZoneByName,getZoneById,update,getAll,getClientsByZoneName,getResumenPorZona
+    create,concatZoneInfo,remove,getZoneByName,getZoneById,update,getAll,getClientsByZoneName,getClientsByZoneId,getResumenPorZona
 }

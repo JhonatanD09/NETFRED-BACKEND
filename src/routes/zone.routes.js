@@ -7,11 +7,12 @@ import {verifyAdminRole} from '../middlewares/rolesCheck'
 router.post('/',[verifyToken],[verifyAdminRole], controller.create)
 router.delete('/:id', [verifyToken],[verifyAdminRole], controller.remove)
 router.get('/nombre/:nombre', [verifyToken],[verifyAdminRole], controller.getZoneByName);
-router.get('/id/:id', [verifyToken],[verifyAdminRole], controller.getZoneById);
 router.put('/:id', [verifyToken], [verifyAdminRole], controller.update);
 router.get('/', [verifyToken], [verifyAdminRole], controller.getAll);
 router.get('/clientes/:nombre', [verifyToken], [verifyAdminRole], controller.getClientsByZoneName);
+router.get('/clientes/id/:id', [verifyToken], [verifyAdminRole], controller.getClientsByZoneId);
 router.get('/resumen', [verifyToken], [verifyAdminRole], controller.getResumenPorZona);
+router.get('/id/:id', [verifyToken],[verifyAdminRole], controller.getZoneById);
 
 
 

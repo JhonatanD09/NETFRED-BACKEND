@@ -48,6 +48,26 @@ const getClientesByZoneName = async (nombreZona) => {
     return rows;
 };
 
+const getClientesByZoneId = async (idZona) => {
+    const [rows] = await (await pool).query(`
+        SELECT 
+            c.nombres_completos,
+            c.numero_documento_cliente,
+            c.correo,
+            c.direccion,
+            z.nombre AS nombre_zona,
+            co.id_contrato,
+            co.fecha_inicio
+        FROM cliente c
+        JOIN contrato co ON c.numero_documento_cliente = co.numero_documento_cliente
+        JOIN servicio s ON co.id_servicio = s.id_servicio
+        JOIN zonas z ON s.id_zona = z.id_zona
+        WHERE z.id_zona = ?
+    `, [idZona]);
+
+    return rows;
+};
+
 const getResumenZona = async () => {
     const query = `
         SELECT 
@@ -73,5 +93,6 @@ module.exports = {
     updateZone,
     getAllZones,
     getClientesByZoneName,
+    getClientesByZoneId,
     getResumenZona
 }
