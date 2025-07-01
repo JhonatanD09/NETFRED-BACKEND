@@ -13,6 +13,7 @@ router.get('/clientes/:nombre', [verifyToken], [verifyAdminRole], controller.get
 router.get('/clientes/id/:id', [verifyToken], [verifyAdminRole], controller.getClientsByZoneId);
 router.get('/resumen', [verifyToken], [verifyAdminRole], controller.getResumenPorZona);
 router.get('/id/:id', [verifyToken],[verifyAdminRole], controller.getZoneById);
+router.get('/contratos/:id', [verifyToken, verifyAdminRole], controller.getAllContractsByZone);
 
 
 

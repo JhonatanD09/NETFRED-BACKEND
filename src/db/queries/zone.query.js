@@ -85,7 +85,25 @@ const getResumenZona = async () => {
     return (await pool).query(query);
 };
 
-
+const getContractsByZoneId = async (id_zona) => {
+    return (await pool).query(
+        `SELECT 
+            ct.id_contrato,
+            ct.fecha_inicio,
+            ct.fecha_terminacion,
+            cl.nombres_completos AS nombre_cliente,
+            cl.numero_documento_cliente,
+            z.nombre AS zona,
+            p.nombre_plan
+        FROM contrato ct
+        INNER JOIN cliente cl ON ct.numero_documento_cliente = cl.numero_documento_cliente
+        INNER JOIN servicio s ON ct.id_servicio = s.id_servicio
+        INNER JOIN zonas z ON s.id_zona = z.id_zona
+        INNER JOIN planes p ON s.id_plan = p.id_plan
+        WHERE z.id_zona = ?`,
+        [id_zona]
+    );
+};
 
 module.exports = {
     createZone,
@@ -96,5 +114,6 @@ module.exports = {
     getAllZones,
     getClientesByZoneName,
     getClientesByZoneId,
-    getResumenZona
+    getResumenZona,
+    getContractsByZoneId
 }
