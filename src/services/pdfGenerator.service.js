@@ -24,6 +24,10 @@ const generarPDF = (id, datos) => {
         const originalY = doc.y;
 
         doc.fontSize(8)
+       
+
+        doc.image('src/services/assets/fondo.jpeg', 0, 0, { width: 620, height: 900 });
+
         doc.image('src/services/assets/logo.jpg', 75, 10, { width: 200, height: 120 });
 
         const tabX = originalX + 300;
@@ -130,6 +134,47 @@ const generarPDF = (id, datos) => {
 
         //desprendible 
 
+        doc.fontSize(8)
+        doc.undash();
+
+         const infoTablaFechasDesprendible = [
+            ['Fecha', '10/02/2025'],
+            ['Periodo de facturacion', '01/02/2025 - 02/02/2025'],
+            ['Pago oportuno', '25/02/2025'],
+            ['Fecha suspencion', '06/03/2025']
+        ];
+
+
+        dibujarTablaInfo({ doc, data: infoTablaFechasDesprendible, width : 240 , xInit : 300, yInit: 600});
+
+           const infoResume = [
+            ['Cuenta de cobro', datos.cuenta],
+            ['Nombre', datos.nombre],
+            ['Documento', '1234567'],
+            ['Direccion', datos.direccion]
+        ];
+
+
+        dibujarTablaInfo({ doc, data: infoResume, width : 230 , xInit : 70, yInit: 600});
+
+        doc
+            .rect(71, 700, 230, 20)
+            .strokeColor('black')
+            .stroke();
+
+        doc.
+            font('Helvetica-BoldOblique')
+            .text('TIPO DE SERVICIO', 150, 706)
+
+        
+        doc
+            .rect(301, 700, 240, 20)
+            .strokeColor('black')
+            .stroke();
+
+        doc.
+            font('Helvetica-BoldOblique')
+            .text('TOTAL : 45000', 306, 706)
 
 
         doc.end();
@@ -227,7 +272,7 @@ function dibujarTablaMovimientos({ doc, data, width = null }) {
     ]);
 
     for (let i = 1; i < 6; i++) {
-        filas.push(['Saldo anterior', '', '']);
+        filas.push(['', '', '']);
     }
 
     filas.forEach(row => {
