@@ -35,6 +35,7 @@ const getClientesByZoneName = async (nombreZona) => {
             c.numero_documento_cliente,
             c.correo,
             c.direccion,
+            c.celular,
             z.nombre AS nombre_zona,
             co.id_contrato,
             co.fecha_inicio
@@ -55,6 +56,7 @@ const getClientesByZoneId = async (idZona) => {
             c.numero_documento_cliente,
             c.correo,
             c.direccion,
+            c.celular,
             z.nombre AS nombre_zona,
             co.id_contrato,
             co.fecha_inicio
