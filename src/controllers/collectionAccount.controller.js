@@ -1,4 +1,4 @@
-import {createCuentaCobro,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails } from '../db/queries/collectionAccount.query'
+import {createCuentaCobro,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro } from '../db/queries/collectionAccount.query'
 import {cuentaCobroMessages} from '../constans/ErrorConstans'
 
 const create = async (req, res) => {
@@ -34,7 +34,7 @@ const getById = async (req, res) => {
   }
 };
 
-const update = async (req, res) => {
+/*const update = async (req, res) => {
   
   const id = req.params.id;
   const cuentaCobro = req.body;
@@ -52,7 +52,7 @@ const update = async (req, res) => {
     
     res.status(500).json({ message: cuentaCobroMessages.ERROR });
   }
-};
+};*/
 
 const remove = async (req, res) => {
   try {
@@ -98,6 +98,37 @@ const getAllBillingDetailsController = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener cuentas de cobro.' });
   }
 };
+
+const update = async (req, res) => {
+  const id = req.params.id;
+  const cuentaCobro = req.body;
+
+  try {
+    const existing = await getCuentaCobroById(id);
+    if (existing[0].length === 0) {
+      return res.status(404).json({ message: cuentaCobroMessages.CUENTACOBRO_NOT_FOUND });
+    }
+
+    const estadoAnterior = existing[0][0].id_estado;
+    const estadoNuevo = cuentaCobro.statudId;
+    
+    
+    await updateCuentaCobro(cuentaCobro, id);
+    // Si solo cambia el estado y es a "Pagado"
+    if (estadoAnterior !== estadoNuevo) {
+      const estadoPagadoId = await getEstadoIdByNombre('Pagada', 'Cuenta Cobro');
+      if (estadoNuevo === estadoPagadoId) {
+        await registrarPagoDesdeCuentaCobro(id);
+      }
+    }
+
+    res.status(201).json({ message: cuentaCobroMessages.CUENTA_UPDATE });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: cuentaCobroMessages.ERROR });
+  }
+};
+
 
 module.exports = {
   create,

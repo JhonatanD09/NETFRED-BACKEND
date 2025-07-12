@@ -26,12 +26,12 @@ const getCuentaCobroById = async (id) => {
 const updateCuentaCobro = async (cuentaCobro, id) => {
   return (await pool).query(`
     UPDATE cuenta_de_cobro 
-    SET fecha_creacion = ?, id_medio_pago = ?, impuesto = ?, numero_documento_cliente = ?, id_estado = ? 
+    SET fecha_creacion = ?, id_medio_pago = ?, impuesto = ?, id_contrato = ?, id_estado = ? 
     WHERE id_cuenta_cobro = ?`,
     [cuentaCobro.createDate,
      cuentaCobro.metodoPagoId,
      cuentaCobro.impuesto,
-     cuentaCobro.documentClient,
+     cuentaCobro.id_contrato,
      cuentaCobro.statudId,
      id]
   );
@@ -102,7 +102,8 @@ const getBillingDetails = async () => {
             cl.direccion,
             cl.celular AS no_celular,
             s.precio AS subtotal,
-            cc.impuesto AS iva,
+            cc.impuesto,
+            ROUND(s.precio * (cc.impuesto / 100.0), 2) AS IVA,
             p.nombre_plan
         FROM 
             cuenta_de_cobro cc
@@ -113,6 +114,48 @@ const getBillingDetails = async () => {
     );
 };
 
+const getEstadoIdByNombre = async (nombre, tabla) => {
+  const [rows] = await (await pool).query(`
+    SELECT id_estado FROM Estado WHERE nombre_estado = ? AND tabla_referencia = ?
+  `, [nombre, tabla]);
+  return rows[0]?.id_estado || null;
+};
+
+const registrarPagoDesdeCuentaCobro = async (idCuentaCobro) => {
+  const db = await pool;
+
+  const [rows] = await db.query(`
+    SELECT 
+      ROUND(srv.precio + (srv.precio * (cdc.impuesto / 100.0)), 2) AS valor_pagado,
+      cdc.id_medio_pago,
+      cli.numero_documento_cliente,
+      srv.id_zona,
+      srv.id_plan
+    FROM Cuenta_de_cobro cdc
+    INNER JOIN Contrato ct ON cdc.id_contrato = ct.id_contrato
+    INNER JOIN Cliente cli ON ct.numero_documento_cliente = cli.numero_documento_cliente
+    INNER JOIN Servicio srv ON ct.id_servicio = srv.id_servicio
+    WHERE cdc.id_cuenta_cobro = ?;
+  `, [idCuentaCobro]);
+
+  if (rows.length === 0) return;
+
+  const datos = rows[0];
+
+  await db.query(`
+    INSERT INTO Pago (fecha_pago, valor_pagado, id_cuenta_cobro, id_medio_pago, 
+                      numero_documento_cliente, id_zona, id_plan)
+    VALUES (CURDATE(), ?, ?, ?, ?, ?, ?)
+  `, [
+    datos.valor_pagado,
+    idCuentaCobro,
+    datos.id_medio_pago,
+    datos.numero_documento_cliente,
+    datos.id_zona,
+    datos.id_plan
+  ]);
+};
+
 module.exports = {
   createCuentaCobro,
   getAllCuentasCobro,
@@ -120,5 +163,7 @@ module.exports = {
   updateCuentaCobro,
   deleteCuentaCobro,
   getBillsByClientDocument,
-  getBillingDetails
+  getBillingDetails,
+  getEstadoIdByNombre,
+  registrarPagoDesdeCuentaCobro
 };
