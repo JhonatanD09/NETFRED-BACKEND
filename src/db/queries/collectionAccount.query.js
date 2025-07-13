@@ -23,16 +23,11 @@ const getCuentaCobroById = async (id) => {
   return (await pool).query('SELECT * FROM cuenta_de_cobro WHERE id_cuenta_cobro = ?', id);
 };
 
-const updateCuentaCobro = async (cuentaCobro, id) => {
+const updateCuentaCobro = async (statusId, id) => {
   return (await pool).query(`
     UPDATE cuenta_de_cobro 
-    SET fecha_creacion = ?, id_medio_pago = ?, impuesto = ?, id_contrato = ?, id_estado = ? 
-    WHERE id_cuenta_cobro = ?`,
-    [cuentaCobro.createDate,
-     cuentaCobro.metodoPagoId,
-     cuentaCobro.impuesto,
-     cuentaCobro.id_contrato,
-     cuentaCobro.statudId,
+    SET id_estado = ? WHERE id_cuenta_cobro = ?`,
+    [statusId,
      id]
   );
 };

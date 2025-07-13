@@ -101,7 +101,7 @@ const getAllBillingDetailsController = async (req, res) => {
 
 const update = async (req, res) => {
   const id = req.params.id;
-  const cuentaCobro = req.body;
+  const statusId = req.params.statusId ;
 
   try {
     const existing = await getCuentaCobroById(id);
@@ -110,10 +110,10 @@ const update = async (req, res) => {
     }
 
     const estadoAnterior = existing[0][0].id_estado;
-    const estadoNuevo = cuentaCobro.statudId;
+    const estadoNuevo = statusId;
     
     
-    await updateCuentaCobro(cuentaCobro, id);
+    await updateCuentaCobro(statusId, id);
     // Si solo cambia el estado y es a "Pagado"
     if (estadoAnterior !== estadoNuevo) {
       const estadoPagadoId = await getEstadoIdByNombre('Pagada', 'Cuenta Cobro');
