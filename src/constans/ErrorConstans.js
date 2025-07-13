@@ -29,7 +29,8 @@ export const planesMessages = {
     ERROR_SEARCH_PLAN: 'Error al buscar el plan',
     PLAN_UPDATED: 'Plan actualizadao correctamente',
     PLAN_NOT_UPDATED: 'Error al actualizar el plan',
-    GET_ALL_PLAN_ERROR: 'Error al obtener todos los planes'
+    GET_ALL_PLAN_ERROR: 'Error al obtener todos los planes',
+    ERROR_CHANGE_STATUS_BY_SERVICE_ASSOCIATED: 'No se puede inactivar el plan porque existen servicios activos asociados.'
 }
 
 export const statusMessages = {

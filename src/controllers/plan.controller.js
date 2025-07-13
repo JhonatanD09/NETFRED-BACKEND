@@ -1,4 +1,4 @@
-import {createPlan, searchPlanByName, searchPlanByID, deletePlan, updatePlan, getAllPlan} from '../db/queries/plan.query'
+import {createPlan, searchPlanByName, searchPlanByID, deletePlan, updatePlan, getAllPlan, getEstadoId, getServiciosActivosByPlanId} from '../db/queries/plan.query'
 import {planesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -65,22 +65,37 @@ const remove = async(req,res)=>{
 }
 
 const update = async (req, res) => {
-    const id = req.params.id;
-    const plan = await concatPlanInfo(req.body);
+  const id = req.params.id;
+  const plan = await concatPlanInfo(req.body);
 
-    try {
-        const existing = await searchPlanByID(id);
-        if (existing[0].length === 0) {
-            return res.status(404).json({ message: planesMessages.PLAN_NOT_FOUND });
-        }
-
-        await updatePlan(plan, id);
-        res.status(200).json({ message: planesMessages.PLAN_UPDATED });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: planesMessages.PLAN_NOT_UPDATED });
+  try {
+    const existing = await searchPlanByID(id);
+    if (existing[0].length === 0) {
+      return res.status(404).json({ message: planesMessages.PLAN_NOT_FOUND });
     }
+
+    // Verificar si el nuevo estado es "Inactivo"
+    const estadoInactivoId = await getEstadoId('Inactivo', 'Planes');
+    const estadoActivoId = await getEstadoId('Activo', 'Servicios');
+    
+    if (plan.id_estado == estadoInactivoId) {
+        const serviciosActivos = await getServiciosActivosByPlanId(id, estadoActivoId);
+
+        if (serviciosActivos > 0) {
+            return res.status(400).json({
+                message: planesMessages.ERROR_CHANGE_STATUS_BY_SERVICE_ASSOCIATED
+            });
+        } 
+    }
+
+    await updatePlan(plan, id);
+    res.status(200).json({ message: planesMessages.PLAN_UPDATED });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: planesMessages.PLAN_NOT_UPDATED });
+  }
 };
+
 
 const concatPlanInfo = async (info) =>{
     return{

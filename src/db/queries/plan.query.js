@@ -26,6 +26,23 @@ const updatePlan = async (plan, id) => {
 const getAllPlan = async () => {
     return (await pool).query('SELECT * FROM PLANES');
 };
+
+const getEstadoId = async (nombreEstado, tablaReferencia) => {
+  const [rows] = await (await pool).query(
+    'SELECT id_estado FROM Estado WHERE nombre_estado = ? AND tabla_referencia = ?',
+    [nombreEstado, tablaReferencia]
+  );
+  return rows.length > 0 ? rows[0].id_estado : null;
+};
+
+const getServiciosActivosByPlanId = async (idPlan, idEstadoActivo) => {
+  const [rows] = await (await pool).query(
+    'SELECT COUNT(*) AS total FROM Servicio WHERE id_plan = ? AND id_estado = ?',
+    [idPlan, idEstadoActivo]
+  );
+  return rows[0]?.total || 0;
+};
+
   
 
 module.exports = {
@@ -34,5 +51,7 @@ module.exports = {
     searchPlanByID,
     deletePlan,
     updatePlan,
-    getAllPlan
+    getAllPlan,
+    getEstadoId,
+    getServiciosActivosByPlanId
 }
