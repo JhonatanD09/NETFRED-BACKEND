@@ -4,6 +4,6 @@ const controller = require('../controllers/user.controller')
 import {verifyToken} from '../middlewares/jwtCheck'
 import {verifyAdminRole} from '../middlewares/rolesCheck'
 
-router.post('/',[verifyToken],[verifyAdminRole], controller.create)
+router.post('/', controller.create)
 
 module.exports = router

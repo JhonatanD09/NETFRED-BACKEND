@@ -1,28 +1,58 @@
 const pdfGenerateService = require('../services/pdfGenerator.service')
+import { getBillingDetails } from '../db/queries/collectionAccount.query'
 
-const datos = {
-  cuenta: '55',
-  fecha: '10/02/2025',
-  nombre: 'FREDDY PEÑA',
-  cedula: '17410484',
-  direccion: 'EL RUBÍ',
-  celular: '3132139724',
-  periodo: '01/02/2025 - 28/02/2025',
-  pagoOportuno: '25/02/2025',
-  suspension: '06/03/2025',
-  descripcion: 'INSTALACIÓN',
-  mes: 'ENERO',
-  valor: 45000,
-  fechaCancelacion: '11/02/2025'
-};
+function construirDatosDesdeResultado(resultado) {
+  const hoy = new Date();
+  
+  const fecha = hoy.toLocaleDateString('es-CO');
 
+  const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+  const inicioMesAnterior = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth(), 1);
+  const finMesAnterior = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth() + 1, 0);
+
+  const formatFecha = (date) => date.toLocaleDateString('es-CO');
+
+  const nombresMeses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
+
+  const pagoOportuno = new Date(hoy);
+  pagoOportuno.setDate(hoy.getDate() + 5);
+
+  const suspension = new Date(hoy);
+  suspension.setDate(hoy.getDate() + 6);
+
+  const subTotal = parseFloat(resultado.subtotal);
+  const valorIva = parseFloat(resultado.IVA);
+  const valorTotal = subTotal + valorIva;
+
+  return {
+    cuenta: resultado.cuenta_de_cobro.toString(),
+    fecha: formatFecha(hoy),
+    nombre: resultado.nombre_cliente,
+    cedula: resultado.no_cedula,
+    direccion: resultado.direccion,
+    celular: resultado.no_celular,
+    periodo: `${formatFecha(inicioMesAnterior)} - ${formatFecha(finMesAnterior)}`,
+    pagoOportuno: formatFecha(pagoOportuno),
+    suspension: formatFecha(suspension),
+    descripcion: `Pago mensualidad - ${resultado.nombre_plan}`,
+    mes: nombresMeses[mesAnterior.getMonth()],
+    subTotal: subTotal,
+    valor: valorTotal,
+    impuesto: parseFloat(resultado.impuesto),
+    valor_iva: valorIva,
+    fechaCancelacion: formatFecha(hoy)
+  };
+}
 
 const generate = async (req, res) => {
-  const totalPDFs = 1;
+
+  let data = await getBillingDetails()
+  data = data[0]
+
   const tareas = [];
 
-  for (let i = 1; i <= totalPDFs; i++) {
-    tareas.push(pdfGenerateService.generarPDF(i,datos));
+  for (let i = 0; i < data.length; i++) {
+    tareas.push(pdfGenerateService.generarPDF(i+1,construirDatosDesdeResultado(data[i])));
   }
 
   await Promise.all(tareas); 

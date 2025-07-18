@@ -57,10 +57,10 @@ const generarPDF = (id, datos) => {
         dibujarTablaInfo({ doc, data: infoTabla, width : 200 });
 
         const infoTablaFechas = [
-            ['Fecha', '10/02/2025'],
-            ['Periodo de facturacion', '01/02/2025 - 02/02/2025'],
-            ['Pago oportuno', '25/02/2025'],
-            ['Fecha suspencion', '06/03/2025'],
+            ['Fecha', datos.fecha],
+            ['Periodo de facturacion', datos.periodo],
+            ['Pago oportuno', datos.pagoOportuno],
+            ['Fecha suspencion', datos.suspension],
             ['Telefonos', '3173632087 - 3209419285'],
         ];
 
@@ -74,10 +74,10 @@ const generarPDF = (id, datos) => {
         doc.x = originalX;
 
         const datosResumen = [
-            'SUBTOTAL', 45000,
-            'IVA', 0,
+            'SUBTOTAL', datos.subTotal,
+            'IVA', datos.impuesto +' %',
             'DESCUENTOS', 0,
-            'TOTAL', 45000
+            'TOTAL', datos.valor_iva +  datos.subTotal
         ];
 
         const startX = 306; // posición X donde empieza la tabla
@@ -138,10 +138,10 @@ const generarPDF = (id, datos) => {
         doc.undash();
 
          const infoTablaFechasDesprendible = [
-            ['Fecha', '10/02/2025'],
-            ['Periodo de facturacion', '01/02/2025 - 02/02/2025'],
-            ['Pago oportuno', '25/02/2025'],
-            ['Fecha suspencion', '06/03/2025']
+            ['Fecha', datos.fecha],
+            ['Periodo de facturacion', datos.periodo],
+            ['Pago oportuno', datos.pagoOportuno],
+            ['Fecha suspencion', datos.suspension]
         ];
 
 
@@ -150,7 +150,7 @@ const generarPDF = (id, datos) => {
            const infoResume = [
             ['Cuenta de cobro', datos.cuenta],
             ['Nombre', datos.nombre],
-            ['Documento', '1234567'],
+            ['Documento', datos.cedula],
             ['Direccion', datos.direccion]
         ];
 
@@ -174,7 +174,7 @@ const generarPDF = (id, datos) => {
 
         doc.
             font('Helvetica-BoldOblique')
-            .text('TOTAL : 45000', 306, 706)
+            .text('TOTAL : ' + (datos.valor_iva +  datos.subTotal), 306, 706)
 
 
         doc.end();
@@ -268,7 +268,7 @@ function dibujarTablaMovimientos({ doc, data, width = null }) {
     filas.push([
         data.descripcion || '',
         data.mes || '',
-        data.valor?.toLocaleString('es-CO') || ''
+        data.subTotal?.toLocaleString('es-CO') || ''
     ]);
 
     for (let i = 1; i < 6; i++) {
