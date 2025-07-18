@@ -11,6 +11,8 @@ module.exports =  {
         user: process.env.MYSQL_USER,
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DB
+    },
+    outDir:{
+        report: process.env.REPORT_ROUTE || 'D:/report'
     }
-    
 }

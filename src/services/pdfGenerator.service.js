@@ -1,8 +1,9 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const config = require('../config');
 
-const outputDir = path.join('D:/test', 'pdfs');
+const outputDir = path.join(config.outDir.report);
 
 
 
