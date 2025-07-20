@@ -25,7 +25,7 @@ function construirDatosDesdeResultado(resultado) {
   const valorTotal = subTotal + valorIva;
 
   return {
-    cuenta: resultado.cuenta_de_cobro.toString(),
+    cuenta: "1",
     fecha: formatFecha(hoy),
     nombre: resultado.nombre_cliente,
     cedula: resultado.no_cedula,

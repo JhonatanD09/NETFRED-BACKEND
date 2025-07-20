@@ -1,4 +1,4 @@
-import {createCuentaCobro,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro } from '../db/queries/collectionAccount.query'
+import {createCuentaCobro,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona } from '../db/queries/collectionAccount.query'
 import {cuentaCobroMessages} from '../constans/ErrorConstans'
 
 const create = async (req, res) => {
@@ -89,12 +89,25 @@ const getHistoryByDocument = async (req, res) => {
 };
 
 const getAllBillingDetailsController = async (req, res) => {
-  console.log("hola");
   try {
     const [results] = await getBillingDetails();
     res.status(200).json(results);
   } catch (error) {
     console.error('Error al obtener detalles de cuentas de cobro:', error);
+    res.status(500).json({ message: 'Error al obtener cuentas de cobro.' });
+  }
+};
+
+const getBillingDetailsByZonaController = async (req, res) => {
+  try {
+    const idZona = req.query.idZona;
+    if (!idZona) {
+      return res.status(400).json({ message: 'Debe especificar el idZona como parámetro de consulta (query).' });
+    }
+    const [results] = await getBillingDetailsByZona(idZona);
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('Error al obtener detalles de cuentas de cobro por zona:', error);
     res.status(500).json({ message: 'Error al obtener cuentas de cobro.' });
   }
 };
@@ -138,5 +151,6 @@ module.exports = {
   remove,
   concatCuentaCobroInfo,
   getHistoryByDocument,
-  getAllBillingDetailsController
+  getAllBillingDetailsController,
+  getBillingDetailsByZonaController
 };

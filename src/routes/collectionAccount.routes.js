@@ -11,6 +11,7 @@ router.get('/:id', [verifyToken, verifyAdminRole], controller.getById);
 router.put('/:id', [verifyToken, verifyAdminRole], controller.update);
 router.delete('/:id', [verifyToken, verifyAdminRole], controller.remove);
 router.get('/historial/:documento', [verifyToken, verifyAdminRole],controller.getHistoryByDocument);
+router.get('/generate_data/:id',[verifyToken, verifyAdminRole],controller.getAllBillingDetailsController);
 
 
 module.exports = router;

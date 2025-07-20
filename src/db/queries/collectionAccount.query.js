@@ -68,30 +68,6 @@ const getBillsByClientDocument = async (document) => {
     return (await pool).query(
         `SELECT 
             cc.id_cuenta_cobro AS cuenta_de_cobro,
-            c.nombres_completos,
-            c.numero_documento_cliente AS no_cedula,
-            c.direccion,
-            c.celular AS no_celular,
-            s.precio AS subtotal,
-            cc.impuesto,
-            p.nombre_plan
-        FROM 
-            CUENTA_DE_COBRO cc
-        INNER JOIN 
-            CONTRATO ct ON cc.id_contrato = ct.id_contrato
-        INNER JOIN 
-            CLIENTE c ON ct.numero_documento_cliente = c.numero_documento_cliente
-        INNER JOIN 
-            SERVICIO s ON ct.id_servicio = s.id_servicio
-        INNER JOIN 
-            PLANES p ON s.id_plan = p.id_plan`
-    );
-};*/
-
-const getBillingDetails = async () => {
-    return (await pool).query(
-        `SELECT 
-            cc.id_cuenta_cobro AS cuenta_de_cobro,
             cl.nombres_completos AS nombre_cliente,
             cl.numero_documento_cliente AS no_cedula,
             cl.direccion,
@@ -106,6 +82,113 @@ const getBillingDetails = async () => {
         INNER JOIN cliente cl ON c.numero_documento_cliente = cl.numero_documento_cliente
         INNER JOIN servicio s ON c.id_servicio = s.id_servicio
         INNER JOIN planes p ON s.id_plan = p.id_plan`
+    );
+};*/
+
+const getBillingDetails = async () => {
+    return (await pool).query(`
+        SELECT
+          cl.nombres_completos AS nombre_cliente,
+          cl.numero_documento_cliente AS no_cedula,
+          cl.direccion,
+          cl.celular AS no_celular,
+          s.precio AS subtotal_base,
+          c.fecha_inicio,
+          p.nombre_plan,
+          19 AS impuesto, -- Puedes parametrizar este valor si lo deseas
+
+          -- Días facturados solo si es el primer mes
+          DATEDIFF(
+            LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+            GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+          ) + 1 AS dias_facturados,
+
+          -- Total de días del mes
+          DAY(LAST_DAY(NOW())) AS dias_del_mes,
+
+          -- Subtotal prorrateado si es el primer mes, completo si no
+          ROUND(
+            IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+              (DATEDIFF(
+                LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+                GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+              ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))),
+              s.precio
+            ),
+          2) AS subtotal,
+
+          -- IVA prorrateado si es el primer mes, completo si no
+          ROUND(
+            IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+              (DATEDIFF(
+                LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+                GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+              ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
+              s.precio * (19 / 100)
+            ),
+          2) AS IVA
+
+          FROM 
+            contrato c
+          INNER JOIN cliente cl ON c.numero_documento_cliente = cl.numero_documento_cliente
+          INNER JOIN servicio s ON c.id_servicio = s.id_servicio
+          INNER JOIN planes p ON s.id_plan = p.id_plan
+          WHERE c.id_estado = (SELECT id_estado FROM Estado WHERE nombre_estado = 'ACTIVO' AND tabla_referencia = 'Contrato')
+          `
+    );
+};
+
+const getBillingDetailsByZona = async (idZona) => {
+    return (await pool).query(`
+      SELECT
+        cl.nombres_completos AS nombre_cliente,
+        cl.numero_documento_cliente AS no_cedula,
+        cl.direccion,
+        cl.celular AS no_celular,
+        s.precio AS subtotal_base,
+        c.fecha_inicio,
+        p.nombre_plan,
+        z.nombre AS zona,
+        19 AS impuesto,
+
+        DATEDIFF(
+        LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+        GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+        ) + 1 AS dias_facturados,
+
+        DAY(LAST_DAY(NOW())) AS dias_del_mes,
+
+        ROUND(
+          IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+            (DATEDIFF(
+              LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+              GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))),
+            s.precio
+          ),
+        2) AS subtotal,
+
+        ROUND(
+          IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+            (DATEDIFF(
+              LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+              GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
+            s.precio * (19 / 100)
+          ),
+        2) AS IVA
+
+        FROM 
+          contrato c
+        INNER JOIN cliente cl ON c.numero_documento_cliente = cl.numero_documento_cliente
+        INNER JOIN servicio s ON c.id_servicio = s.id_servicio
+        INNER JOIN planes p ON s.id_plan = p.id_plan
+        INNER JOIN zonas z ON s.id_zona = z.id_zona
+        WHERE 
+          c.id_estado = (SELECT id_estado FROM Estado WHERE nombre_estado = 'ACTIVO' AND tabla_referencia = 'Contrato')
+          AND s.id_zona = ?
+        `,
+        [idZona]
     );
 };
 
@@ -160,5 +243,6 @@ module.exports = {
   getBillsByClientDocument,
   getBillingDetails,
   getEstadoIdByNombre,
-  registrarPagoDesdeCuentaCobro
+  registrarPagoDesdeCuentaCobro,
+  getBillingDetailsByZona
 };
