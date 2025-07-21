@@ -1,8 +1,22 @@
 import pool from '../database'
 
-const createContrato = async (contrato)=>{
-    return (await pool).query('INSERT INTO CONTRATO SET ?',contrato)
-}
+const formatDateForMySQL = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+};
+
+const createContrato = async (contrato) => {
+    const contratoFormatted = {
+        ...contrato,
+        fecha_inicio: formatDateForMySQL(contrato.fecha_inicio),
+        fecha_terminacion: formatDateForMySQL(contrato.fecha_terminacion),
+        fecha_inscripcion: formatDateForMySQL(contrato.fecha_inscripcion)
+    };
+
+    return (await pool).query('INSERT INTO CONTRATO SET ?', contratoFormatted);
+};
 
 const searchContratoByFechaInicio = async (fechaInicio) => {
     return (await pool).query('SELECT * FROM CONTRATO WHERE fecha_inicio = ?',fechaInicio);
@@ -31,19 +45,15 @@ const updateContract = async (contract, id) => {
             fecha_inicio = ?, 
             id_estado = ?, 
             fecha_terminacion = ?, 
-            id_servicio = ?, 
             fecha_inscripcion = ?, 
-            numero_documento_cliente = ?, 
             ubicacion = ?, 
             Georreferencia = ?
          WHERE id_contrato = ?`,
         [
-            contract.startDate,
+            formatDateForMySQL(contract.startDate),
             contract.statusId,
-            contract.endDate,
-            contract.serviceId,
-            contract.inscriptionDate,
-            contract.clientDocument,
+            formatDateForMySQL(contract.endDate),
+            formatDateForMySQL(contract.inscriptionDate),
             contract.location,
             contract.georeference,
             id
