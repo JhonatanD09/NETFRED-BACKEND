@@ -88,6 +88,7 @@ const getBillsByClientDocument = async (document) => {
 const getBillingDetails = async () => {
     return (await pool).query(`
         SELECT
+          c.id_contrato AS Referencia_Pago,
           cl.nombres_completos AS nombre_cliente,
           cl.numero_documento_cliente AS no_cedula,
           cl.direccion,
@@ -96,7 +97,7 @@ const getBillingDetails = async () => {
           c.fecha_inicio,
           p.nombre_plan,
           19 AS impuesto, -- Puedes parametrizar este valor si lo deseas
-
+          
           -- Días facturados solo si es el primer mes
           DATEDIFF(
             LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
@@ -126,7 +127,19 @@ const getBillingDetails = async () => {
               ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
               s.precio * (19 / 100)
             ),
-          2) AS IVA
+          2) AS IVA,
+
+          ROUND(
+            IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+            (DATEDIFF(
+            LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+            GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+            ) + 1)
+            * (s.precio / DAY(LAST_DAY(NOW())))
+            * (1 + 19 / 100),
+            s.precio * (1 + 19 / 100)
+            ),
+          2) AS total
 
           FROM 
             contrato c
@@ -141,6 +154,7 @@ const getBillingDetails = async () => {
 const getBillingDetailsByZona = async (idZona) => {
     return (await pool).query(`
       SELECT
+        c.id_contrato AS Referencia_Pago,
         cl.nombres_completos AS nombre_cliente,
         cl.numero_documento_cliente AS no_cedula,
         cl.direccion,
@@ -176,7 +190,19 @@ const getBillingDetailsByZona = async (idZona) => {
             ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
             s.precio * (19 / 100)
           ),
-        2) AS IVA
+        2) AS IVA,
+
+        ROUND(
+            IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+            (DATEDIFF(
+            LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+            GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+            ) + 1)
+            * (s.precio / DAY(LAST_DAY(NOW())))
+            * (1 + 19 / 100),
+            s.precio * (1 + 19 / 100)
+            ),
+        2) AS total
 
         FROM 
           contrato c
@@ -189,6 +215,73 @@ const getBillingDetailsByZona = async (idZona) => {
           AND s.id_zona = ?
         `,
         [idZona]
+    );
+};
+
+const getBillingDetailsByIdContrato = async (idContrato) => {
+    return (await pool).query(`
+      SELECT
+        c.id_contrato AS Referencia_Pago,
+        cl.nombres_completos AS nombre_cliente,
+        cl.numero_documento_cliente AS no_cedula,
+        cl.direccion,
+        cl.celular AS no_celular,
+        s.precio AS subtotal_base,
+        c.fecha_inicio,
+        p.nombre_plan,
+        z.nombre AS zona,
+        19 AS impuesto,
+
+        DATEDIFF(
+        LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+        GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+        ) + 1 AS dias_facturados,
+
+        DAY(LAST_DAY(NOW())) AS dias_del_mes,
+
+        ROUND(
+          IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+            (DATEDIFF(
+              LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+              GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))),
+            s.precio
+          ),
+        2) AS subtotal,
+
+        ROUND(
+          IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+            (DATEDIFF(
+              LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+              GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
+            s.precio * (19 / 100)
+          ),
+        2) AS IVA,
+
+        ROUND(
+            IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+            (DATEDIFF(
+            LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+            GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+            ) + 1)
+            * (s.precio / DAY(LAST_DAY(NOW())))
+            * (1 + 19 / 100),
+            s.precio * (1 + 19 / 100)
+            ),
+        2) AS total
+
+        FROM 
+          contrato c
+        INNER JOIN cliente cl ON c.numero_documento_cliente = cl.numero_documento_cliente
+        INNER JOIN servicio s ON c.id_servicio = s.id_servicio
+        INNER JOIN planes p ON s.id_plan = p.id_plan
+        INNER JOIN zonas z ON s.id_zona = z.id_zona
+        WHERE 
+          c.id_estado = (SELECT id_estado FROM Estado WHERE nombre_estado = 'ACTIVO' AND tabla_referencia = 'Contrato')
+          AND c.id_contrato = ?
+        `,
+        [idContrato]
     );
 };
 
@@ -244,5 +337,6 @@ module.exports = {
   getBillingDetails,
   getEstadoIdByNombre,
   registrarPagoDesdeCuentaCobro,
-  getBillingDetailsByZona
+  getBillingDetailsByZona,
+  getBillingDetailsByIdContrato
 };
