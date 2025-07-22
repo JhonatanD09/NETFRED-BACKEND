@@ -15,7 +15,8 @@ const createContrato = async (contrato) => {
         fecha_inscripcion: formatDateForMySQL(contrato.fecha_inscripcion)
     };
 
-    return (await pool).query('INSERT INTO CONTRATO SET ?', contratoFormatted);
+    const [result] = await (await pool).query('INSERT INTO CONTRATO SET ?', contratoFormatted);
+    return result.insertId;
 };
 
 const searchContratoByFechaInicio = async (fechaInicio) => {

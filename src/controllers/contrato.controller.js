@@ -4,8 +4,15 @@ import {contratoMessages} from '../constans/ErrorConstans'
 const create = async (req, res) => {
     const contrato = await concatContractInfo(req.body);    
     try {
-        await createContrato(contrato);
-        res.status(201).json({ message: contratoMessages.CONTRATO_ADD });
+        const contratoId = await createContrato(contrato);
+        res.status(201).json({ 
+            message: contratoMessages.CONTRATO_ADD,
+            contratoId: contratoId,
+            data: {
+                id: contratoId,
+                ...contrato
+            }
+        });
     } catch (error) {
         console.error("Error al crear el contrato:", error);
         res.status(500).json({ message: contratoMessages.ERROR_CONTRATO_ADD });
