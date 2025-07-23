@@ -59,7 +59,7 @@ const generate = async (req, res) => {
   await Promise.all(tareas); 
 
   await getAllBillingDetailsController(req, res);
-  res.json({ mensaje: '✅ Todos los PDFs fueron generados exitosamente.' });
+  res.json({ mensaje: '✅ Todos los PDFs fueron generados exitosamente y los registros fueron insertados en la base de datos.' });
 };
 
 module.exports = {

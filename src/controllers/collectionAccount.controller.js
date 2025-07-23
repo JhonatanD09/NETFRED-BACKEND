@@ -106,6 +106,16 @@ const getAllBillingDetailsController = async (req, res) => {
   try {
     const [results] = await getBillingDetails();
     for (const detalle of results) {
+
+      const fechaActual = new Date();
+      const yaExiste = await cuentaCobroExisteParaContratoYMes(detalle.Referencia_Pago, fechaActual);
+
+      if (yaExiste) {
+        res.status(500).json({ message: `⚠️ Ya existe una cuenta de cobro para algun(os) contrato(s) este mes. Se omite creación.` });
+        //console.log(`⚠️ Ya existe una cuenta de cobro para el contrato ${detalle.Referencia_Pago} este mes. Se omite creación.`);
+        continue;
+      }
+
       const cuentaCobro = {
         fecha_creacion: new Date(), // fecha actual
         id_medio_pago: null, // aún no se ha pagado
@@ -117,7 +127,7 @@ const getAllBillingDetailsController = async (req, res) => {
       };
       await createCuentaCobro(cuentaCobro);
     }
-    res.status(201).json({ message: 'Cuentas de cobro generadas e insertadas correctamente.' });
+    //res.status(201).json({ message: 'Cuentas de cobro generadas e insertadas correctamente.' });
   } catch (error) {
     console.error('Error al generar e insertar cuentas de cobro:', error);
     res.status(500).json({ message: 'Error al generar las cuentas de cobro.' });
@@ -196,13 +206,13 @@ const crearCuentaCobroManual = async (req, res) => {
     }
 
     const info = await obtenerInfoContratoParaCobro(id_contrato);
+    console.log(info);
+    
     if (!info) {
       return res.status(404).json({ mensaje: '❌ No se encontró información del contrato.' });
     }
 
-    const subtotal = info.precio;
     const impuesto = info.impuesto;
-    const total = parseFloat((subtotal * (1 + impuesto / 100)).toFixed(2));
 
     const cuenta = {
       fecha_creacion: new Date(fecha_creacion),
@@ -210,7 +220,7 @@ const crearCuentaCobroManual = async (req, res) => {
       impuesto,
       id_contrato,
       id_estado: 2, // pendiente
-      valor_total_pago: total,
+      valor_total_pago: info.total,
       fecha_pago: null
     };
 

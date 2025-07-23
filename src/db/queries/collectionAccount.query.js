@@ -352,11 +352,74 @@ const cuentaCobroExisteParaContratoYMes = async (id_contrato, fecha_creacion) =>
 
 const obtenerInfoContratoParaCobro = async (id_contrato) => {
   const db = await pool;
-  const [rows] = await db.query( `SELECT s.precio, 19 AS impuesto FROM contrato c INNER JOIN servicio s ON c.id_servicio = s.id_servicio WHERE c.id_contrato = ? `, [id_contrato]);
-  return rows[0];
+  const [rows] = await db.query(
+    `SELECT
+      c.id_contrato AS Referencia_Pago,
+      cl.nombres_completos AS nombre_cliente,
+      cl.numero_documento_cliente AS no_cedula,
+      cl.direccion,
+      cl.celular AS no_celular,
+      s.precio AS subtotal_base,
+      c.fecha_inicio,
+      p.nombre_plan,
+      19 AS impuesto,
+
+      -- Días facturados solo si es el primer mes
+      DATEDIFF(
+        LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+        GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+      ) + 1 AS dias_facturados,
+
+      -- Total de días del mes
+      DAY(LAST_DAY(NOW())) AS dias_del_mes,
+
+      -- Subtotal prorrateado si es el primer mes, completo si no
+      ROUND(
+        IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+          (DATEDIFF(
+            LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+            GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+          ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))),
+          s.precio
+        ),
+      2) AS subtotal,
+
+      -- IVA prorrateado si es el primer mes, completo si no
+      ROUND(
+        IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+          (DATEDIFF(
+            LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+            GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+          ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
+          s.precio * (19 / 100)
+        ),
+      2) AS IVA,
+
+      ROUND(
+        IF(DATE_FORMAT(c.fecha_inicio, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'),
+          (DATEDIFF(
+            LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
+            GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
+          ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (1 + 19 / 100),
+          s.precio * (1 + 19 / 100)
+        ),
+      2) AS total
+
+    FROM 
+      contrato c
+        INNER JOIN cliente cl ON c.numero_documento_cliente = cl.numero_documento_cliente
+        INNER JOIN servicio s ON c.id_servicio = s.id_servicio
+        INNER JOIN planes p ON s.id_plan = p.id_plan
+        WHERE c.id_contrato = ?`,
+  [id_contrato]
+);
+
+return rows[0];
 };
 
 const insertarCuentaCobro = async (cuenta) => {
+  console.log(cuenta.fecha_creacion);
+  
   const query = `INSERT INTO cuenta_de_cobro (fecha_creacion, id_medio_pago, impuesto, id_contrato, id_estado, valor_total_pago, fecha_pago) 
                  VALUES (?, ?, ?, ?, ?, ?, ?)`;
   const values = [
