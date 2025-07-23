@@ -1,4 +1,4 @@
-import {createCuentaCobro,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato } from '../db/queries/collectionAccount.query'
+import {createCuentaCobro,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato, cuentaCobroExisteParaContratoYMes, obtenerInfoContratoParaCobro, insertarCuentaCobro} from '../db/queries/collectionAccount.query'
 import {cuentaCobroMessages} from '../constans/ErrorConstans'
 
 const create = async (req, res) => {
@@ -90,7 +90,7 @@ const getHistoryByDocument = async (req, res) => {
   }
 };
 
-const getAllBillingDetailsController = async (req, res) => {
+/*const getAllBillingDetailsController = async (req, res) => {
   console.log("hola");
   
   try {
@@ -99,6 +99,28 @@ const getAllBillingDetailsController = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener detalles de cuentas de cobro:', error);
     res.status(500).json({ message: 'Error al obtener cuentas de cobro.' });
+  }
+};*/
+
+const getAllBillingDetailsController = async (req, res) => {
+  try {
+    const [results] = await getBillingDetails();
+    for (const detalle of results) {
+      const cuentaCobro = {
+        fecha_creacion: new Date(), // fecha actual
+        id_medio_pago: null, // aún no se ha pagado
+        impuesto: detalle.impuesto,
+        id_contrato: detalle.Referencia_Pago,
+        id_estado: 2, // por ejemplo, 1 = Generada o Pendiente
+        valor_total_pago: detalle.total,
+        fecha_pago: null
+      };
+      await createCuentaCobro(cuentaCobro);
+    }
+    res.status(201).json({ message: 'Cuentas de cobro generadas e insertadas correctamente.' });
+  } catch (error) {
+    console.error('Error al generar e insertar cuentas de cobro:', error);
+    res.status(500).json({ message: 'Error al generar las cuentas de cobro.' });
   }
 };
 
@@ -160,6 +182,46 @@ const update = async (req, res) => {
   }
 };
 
+const crearCuentaCobroManual = async (req, res) => {
+  const { fecha_creacion, id_contrato } = req.body;
+
+  if (!fecha_creacion || !id_contrato) {
+    return res.status(400).json({ mensaje: '❗ Debes enviar fecha_creacion y id_contrato.' });
+  }
+
+  try {
+    const yaExiste = await cuentaCobroExisteParaContratoYMes(id_contrato, fecha_creacion);
+    if (yaExiste) {
+      return res.status(200).json({ mensaje: '⚠ Ya existe una cuenta de cobro para ese contrato en ese mes.' });
+    }
+
+    const info = await obtenerInfoContratoParaCobro(id_contrato);
+    if (!info) {
+      return res.status(404).json({ mensaje: '❌ No se encontró información del contrato.' });
+    }
+
+    const subtotal = info.precio;
+    const impuesto = info.impuesto;
+    const total = parseFloat((subtotal * (1 + impuesto / 100)).toFixed(2));
+
+    const cuenta = {
+      fecha_creacion: new Date(fecha_creacion),
+      id_medio_pago: null,
+      impuesto,
+      id_contrato,
+      id_estado: 2, // pendiente
+      valor_total_pago: total,
+      fecha_pago: null
+    };
+
+    await insertarCuentaCobro(cuenta);
+    return res.status(201).json({ mensaje: '✅ Cuenta de cobro creada correctamente.' });
+  } catch (error) {
+    console.error('Error al crear cuenta manual:', error);
+      return res.status(500).json({ mensaje: '❌ Error interno al crear cuenta de cobro.' });
+  }
+};
+
 
 module.exports = {
   create,
@@ -171,5 +233,6 @@ module.exports = {
   getHistoryByDocument,
   getAllBillingDetailsController,
   getBillingDetailsByZonaController,
-  getBillingDetailsByIdContratoController
+  getBillingDetailsByIdContratoController,
+  crearCuentaCobroManual
 };

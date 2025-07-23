@@ -1,6 +1,6 @@
 import pool from '../database'
 
-const createCuentaCobro = async (cuenta) => {
+/*const createCuentaCobro = async (cuenta) => {
   const query = `
     INSERT INTO cuenta_de_cobro 
     (fecha_creacion, id_medio_pago, impuesto, id_contrato, id_estado) 
@@ -11,6 +11,23 @@ const createCuentaCobro = async (cuenta) => {
     cuenta.impuesto,
     cuenta.id_contrato,
     cuenta.id_estado
+  ];
+  return (await pool).query(query, values);
+};*/
+
+const createCuentaCobro = async (cuenta) => {
+  const query =`
+    INSERT INTO cuenta_de_cobro 
+    (fecha_creacion, id_medio_pago, impuesto, id_contrato, id_estado, valor_total_pago, fecha_pago) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const values = [
+    cuenta.fecha_creacion,
+    cuenta.id_medio_pago || null,
+    cuenta.impuesto,
+    cuenta.id_contrato,
+    cuenta.id_estado,
+    cuenta.valor_total_pago || null,
+    cuenta.fecha_pago || null
   ];
   return (await pool).query(query, values);
 };
@@ -327,6 +344,33 @@ const registrarPagoDesdeCuentaCobro = async (idCuentaCobro) => {
   ]);
 };
 
+const cuentaCobroExisteParaContratoYMes = async (id_contrato, fecha_creacion) => {
+  const db = await pool;
+  const [rows] = await db.query(` SELECT 1 FROM cuenta_de_cobro WHERE id_contrato = ? AND MONTH(fecha_creacion) = MONTH(?) AND YEAR(fecha_creacion) = YEAR(?) LIMIT 1 `, [id_contrato, fecha_creacion, fecha_creacion]);
+  return rows.length > 0;
+};
+
+const obtenerInfoContratoParaCobro = async (id_contrato) => {
+  const db = await pool;
+  const [rows] = await db.query( `SELECT s.precio, 19 AS impuesto FROM contrato c INNER JOIN servicio s ON c.id_servicio = s.id_servicio WHERE c.id_contrato = ? `, [id_contrato]);
+  return rows[0];
+};
+
+const insertarCuentaCobro = async (cuenta) => {
+  const query = `INSERT INTO cuenta_de_cobro (fecha_creacion, id_medio_pago, impuesto, id_contrato, id_estado, valor_total_pago, fecha_pago) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const values = [
+  cuenta.fecha_creacion,
+  cuenta.id_medio_pago,
+  cuenta.impuesto,
+  cuenta.id_contrato,
+  cuenta.id_estado,
+  cuenta.valor_total_pago,
+  cuenta.fecha_pago
+  ];
+  return (await pool).query(query, values);
+};
+
 module.exports = {
   createCuentaCobro,
   getAllCuentasCobro,
@@ -338,5 +382,8 @@ module.exports = {
   getEstadoIdByNombre,
   registrarPagoDesdeCuentaCobro,
   getBillingDetailsByZona,
-  getBillingDetailsByIdContrato
+  getBillingDetailsByIdContrato,
+  cuentaCobroExisteParaContratoYMes,
+  obtenerInfoContratoParaCobro,
+  insertarCuentaCobro
 };

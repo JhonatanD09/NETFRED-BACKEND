@@ -1,5 +1,6 @@
 const pdfGenerateService = require('../services/pdfGenerator.service')
 import { getBillingDetails } from '../db/queries/collectionAccount.query'
+import { getAllBillingDetailsController } from './collectionAccount.controller'
 
 function construirDatosDesdeResultado(resultado) {
   const hoy = new Date();
@@ -57,6 +58,7 @@ const generate = async (req, res) => {
 
   await Promise.all(tareas); 
 
+  await getAllBillingDetailsController(req, res);
   res.json({ mensaje: '✅ Todos los PDFs fueron generados exitosamente.' });
 };
 
