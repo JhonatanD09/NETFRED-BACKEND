@@ -1,22 +1,11 @@
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
 const path = require('path');
-const config = require('../config');
-
-const outputDir = path.join(config.outDir.report);
-
-
-
-const generarPDF = (id, datos) => {
-
-    console.log('📁 Creando carpeta en:', outputDir);
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-    }
+const fs = require('fs');
+const generarPDF = (id, datos, dir) => {
 
     return new Promise((resolve) => {
         const doc = new PDFDocument();
-        const filePath = path.join(outputDir, `archivo_${id}.pdf`);
+        const filePath = path.join(dir, `${datos.no_cedula?datos.no_cedula:'format'}.pdf`);
         const stream = fs.createWriteStream(filePath);
 
         doc.pipe(stream);
@@ -73,12 +62,12 @@ const generarPDF = (id, datos) => {
 
         dibujarTablaMovimientos({ doc, data: datos })
         doc.x = originalX;
-
+        const total = datos.valor_iva?datos.valor_iva:0 + datos.subTotal?datos.subTotal:0
         const datosResumen = [
-            'SUBTOTAL', datos.subTotal,
-            'IVA', datos.impuesto +' %',
+            'SUBTOTAL', datos.subTotal?datos.subTotal:'',
+            'IVA', datos.impuesto?datos.impuesto:'' +' %',
             'DESCUENTOS', 0,
-            'TOTAL', datos.valor_iva +  datos.subTotal
+            'TOTAL', total===0?'':total
         ];
 
         const startX = 306; // posición X donde empieza la tabla
@@ -172,10 +161,10 @@ const generarPDF = (id, datos) => {
             .rect(301, 700, 240, 20)
             .strokeColor('black')
             .stroke();
-
+        console.log(total)
         doc.
             font('Helvetica-BoldOblique')
-            .text('TOTAL : ' + (datos.valor_iva +  datos.subTotal), 306, 706)
+            .text('TOTAL : ' + (total===0?'':total), 306, 706)
 
 
         doc.end();
@@ -216,7 +205,7 @@ function dibujarTablaInfo({ doc, data = [], width = null, xInit = null, yInit = 
             .font('Helvetica')
             .rect(marginLeft + columnWidth, y, columnWidth, rowHeight)
             .stroke()
-            .text(value, marginLeft + columnWidth + 5, y + 7, {
+            .text(value, marginLeft + columnWidth + 5, label === 'Dirección'? y + 2:y+7, {
                 width: columnWidth - 10,
                 align: 'left',
             });
@@ -269,7 +258,7 @@ function dibujarTablaMovimientos({ doc, data, width = null }) {
     filas.push([
         data.descripcion || '',
         data.mes || '',
-        data.subTotal?.toLocaleString('es-CO') || ''
+        data.subTotal?data.subTotal:''
     ]);
 
     for (let i = 1; i < 6; i++) {
