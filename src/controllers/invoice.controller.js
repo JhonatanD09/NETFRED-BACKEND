@@ -1,6 +1,13 @@
 const pdfGenerateService = require('../services/pdfGenerator.service')
-import { getBillingDetails } from '../db/queries/collectionAccount.query'
+import { getBillingDetailsByZona } from '../db/queries/collectionAccount.query'
 import { getAllBillingDetailsController } from './collectionAccount.controller'
+const fs = require('fs');
+const path = require('path');
+import { getAllZones } from '../db/queries/zone.query'
+const config = require('../config');
+
+const outputDir = path.join(config.outDir.report);
+
 
 function construirDatosDesdeResultado(resultado) {
   const hoy = new Date();
@@ -26,7 +33,7 @@ function construirDatosDesdeResultado(resultado) {
   const valorTotal = subTotal + valorIva;
 
   return {
-    cuenta: "1",
+    cuenta: resultado.Referencia_Pago,
     fecha: formatFecha(hoy),
     nombre: resultado.nombre_cliente,
     cedula: resultado.no_cedula,
@@ -35,7 +42,7 @@ function construirDatosDesdeResultado(resultado) {
     periodo: `${formatFecha(inicioMesAnterior)} - ${formatFecha(finMesAnterior)}`,
     pagoOportuno: formatFecha(pagoOportuno),
     suspension: formatFecha(suspension),
-    descripcion: `Pago mensualidad - ${resultado.nombre_plan}`,
+    descripcion: `Pago mensualidad - ${resultado.nombre_plan?resultado.nombre_plan:''}`,
     mes: nombresMeses[mesAnterior.getMonth()],
     subTotal: subTotal,
     valor: valorTotal,
@@ -47,21 +54,38 @@ function construirDatosDesdeResultado(resultado) {
 
 const generate = async (req, res) => {
 
-  let data = await getBillingDetails()
-  data = data[0]
+  let zonas = await getAllZones()
+  let tareas = [];
 
-  const tareas = [];
+  zonas[0].forEach(async element => {
+    let dir =path.join(outputDir,String(new Date().toLocaleDateString('es-CO').toString().replaceAll('/', '-')),element.nombre)
+    console.log('📁 Creando carpeta en:',dir);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    let data = await getBillingDetailsByZona(element.id_zona)
+    data = data[0]
 
-  for (let i = 0; i < data.length; i++) {
-    tareas.push(pdfGenerateService.generarPDF(i+1,construirDatosDesdeResultado(data[i])));
-  }
+    for (let i = 0; i < data.length; i++) {
+      tareas.push(pdfGenerateService.generarPDF(i+1,construirDatosDesdeResultado(data[i]),dir));
+    }
+  });
 
   await Promise.all(tareas); 
 
-  await getAllBillingDetailsController(req, res);
   res.json({ mensaje: '✅ Todos los PDFs fueron generados exitosamente y los registros fueron insertados en la base de datos.' });
 };
 
+const generateEmpty = (req,res) => {
+    let dir =path.join(outputDir,String(new Date().toLocaleDateString('es-CO').toString().replaceAll('/', '-')),'empty')
+    console.log('📁 Creando carpeta en:',dir);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  pdfGenerateService.generarPDF(1,construirDatosDesdeResultado({}),dir)
+  res.json({ mensaje: '✅ PDF generado exitosamente' });
+}
+
 module.exports = {
-  generate  
+  generate,generateEmpty  
 } 
