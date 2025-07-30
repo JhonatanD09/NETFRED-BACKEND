@@ -1,4 +1,5 @@
 import pool from '../database'
+//import {} from './metodoPago.query'
 
 /*const createCuentaCobro = async (cuenta) => {
   const query = `
@@ -36,9 +37,18 @@ const getAllCuentasCobro = async () => {
   return (await pool).query('SELECT * FROM cuenta_de_cobro');
 };
 
-const getCuentaCobroById = async (id) => {
+/*const getCuentaCobroById = async (id) => {
   return (await pool).query('SELECT * FROM cuenta_de_cobro WHERE id_cuenta_cobro = ?', id);
+};*/
+
+const getCuentaCobroById = async (id) => {
+  const [rows] = await (await pool).query(
+    'SELECT * FROM cuenta_de_cobro WHERE id_cuenta_cobro = ?', 
+    [id]
+  );
+  return rows.length > 0 ? rows[0] : null;
 };
+
 
 const updateCuentaCobro = async (statusId, id) => {
   return (await pool).query(`
@@ -434,6 +444,66 @@ const insertarCuentaCobro = async (cuenta) => {
   return (await pool).query(query, values);
 };
 
+const getCuentasCobroPorRangoFechas = async (fechaInicio, fechaFin) => {
+  const db = await pool;
+  const [rows] = await db.query(
+    `SELECT * FROM cuenta_de_cobro WHERE fecha_creacion BETWEEN ? AND ? ORDER BY fecha_creacion DESC`,
+    [fechaInicio, fechaFin]
+  );
+  return rows;
+};
+
+const updateCuentaCobroMedioPago = async (idMedioPago, fechaPago, idCuentaCobro) => {
+  return (await pool).query(
+    `UPDATE cuenta_de_cobro SET id_medio_pago = ?, fecha_pago = ? WHERE id_cuenta_cobro = ?`,
+    [idMedioPago, fechaPago, idCuentaCobro]
+  );
+};
+
+const updateEstadoCuentaCobro = async (nuevoEstado, idCuentaCobro) => {
+  return (await pool).query(
+  `UPDATE cuenta_de_cobro SET id_estado = ? WHERE id_cuenta_cobro = ?`,
+  [nuevoEstado, idCuentaCobro]
+  );
+};
+
+const getBillingDetailsPago = async (idCuenta) => {
+  const [rows] = await (await pool).query(
+    `
+    SELECT 
+      cl.numero_documento_cliente, 
+      z.id_zona, 
+      p.id_plan
+    FROM cuenta_de_cobro cc
+    INNER JOIN contrato c ON cc.id_contrato = c.id_contrato
+    INNER JOIN cliente cl ON c.numero_documento_cliente = cl.numero_documento_cliente
+    INNER JOIN servicio s ON c.id_servicio = s.id_servicio
+    INNER JOIN zonas z ON s.id_zona = z.id_zona
+    INNER JOIN planes p ON s.id_plan = p.id_plan
+    WHERE cc.id_cuenta_cobro = ?
+    `,
+    [idCuenta]
+  );
+  return rows.length > 0 ? rows[0] : null;
+};
+
+const insertarPago = async (fecha_pago,valor_pagado,id_cuenta_cobro,id_medio_pago,numero_documento_cliente,id_zona,id_plan) => {
+  const query =`
+    INSERT INTO pago 
+    (fecha_pago,valor_pagado,id_cuenta_cobro,id_medio_pago,numero_documento_cliente,id_zona,id_plan) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const values = [
+    fecha_pago,
+    valor_pagado,
+    id_cuenta_cobro,
+    id_medio_pago,
+    numero_documento_cliente,
+    id_zona,
+    id_plan 
+  ];
+  return (await pool).query(query, values);
+};
+
 module.exports = {
   createCuentaCobro,
   getAllCuentasCobro,
@@ -448,5 +518,10 @@ module.exports = {
   getBillingDetailsByIdContrato,
   cuentaCobroExisteParaContratoYMes,
   obtenerInfoContratoParaCobro,
-  insertarCuentaCobro
+  insertarCuentaCobro,
+  getCuentasCobroPorRangoFechas,
+  updateCuentaCobroMedioPago,
+  updateEstadoCuentaCobro,
+  getBillingDetailsPago,
+  insertarPago
 };

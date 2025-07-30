@@ -1,5 +1,8 @@
-import {createCuentaCobro,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato, cuentaCobroExisteParaContratoYMes, obtenerInfoContratoParaCobro, insertarCuentaCobro} from '../db/queries/collectionAccount.query'
+import {updateEstadoCuentaCobro,insertarPago,getBillingDetailsPago,updateCuentaCobroMedioPago,createCuentaCobro, getCuentasCobroPorRangoFechas,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato, cuentaCobroExisteParaContratoYMes, obtenerInfoContratoParaCobro, insertarCuentaCobro} from '../db/queries/collectionAccount.query'
 import {cuentaCobroMessages} from '../constans/ErrorConstans'
+import {getMedioPagoIdByNombre} from '../db/queries/metodoPago.query'
+import {getEstadoIdByName} from '../db/queries/status.query'
+
 
 const create = async (req, res) => {
   const cuentaCobro = await concatCuentaCobroInfo(req.body); 
@@ -232,6 +235,51 @@ const crearCuentaCobroManual = async (req, res) => {
   }
 };
 
+const getCuentasCobroPorFechasController = async (req, res) => {  
+  try {
+    const { fechaInicio, fechaFin } = req.query;
+
+    if (!fechaInicio || !fechaFin) {
+      return res.status(400).json({ message: 'Debe proporcionar fechaInicio y fechaFin en los parámetros de consulta.' });
+    }
+
+    const cuentas = await getCuentasCobroPorRangoFechas(fechaInicio, fechaFin);
+    res.status(200).json(cuentas);
+  } catch (error) {
+    console.error('Error al obtener cuentas de cobro por fechas:', error);
+    res.status(500).json({ message: 'Error al obtener cuentas de cobro.' });
+  }
+};
+
+const registrarPagoFactura = async (req, res) => {
+  getBillingDetailsPago()
+  try {
+    const { idCuentaCobro, nombreMedioPago, valorPagado, fechaPago } = req.body;
+
+    const dataPago = await getBillingDetailsPago(idCuentaCobro)
+
+    const idMedioPago = await getMedioPagoIdByNombre(nombreMedioPago);
+    
+    if (!idMedioPago) return res.status(404).json({ message: 'Medio de pago no encontrado' });
+    
+    const cuenta = await getCuentaCobroById(idCuentaCobro);
+       
+    if (!cuenta) return res.status(404).json({ message: 'Cuenta de cobro no encontrada' });
+
+    await updateCuentaCobroMedioPago(idMedioPago, fechaPago, idCuentaCobro);
+
+    if (valorPagado >= cuenta.Valor_Total_Pago) {
+      const id_status_cuenta_cobro_pagada = await getEstadoIdByName("Pagada","Cuenta Cobro");     
+      await updateEstadoCuentaCobro(id_status_cuenta_cobro_pagada, idCuentaCobro);
+      await insertarPago(fechaPago,valorPagado,idCuentaCobro,idMedioPago,dataPago.numero_documento_cliente,dataPago.id_zona,dataPago.id_plan)
+    }
+
+    res.status(200).json({ message: 'Pago registrado correctamente' });
+  } catch (error) {
+    console.error('Error al registrar el pago:', error);
+    res.status(500).json({ message: 'Error interno del servidor' });
+  }
+};
 
 module.exports = {
   create,
@@ -244,5 +292,7 @@ module.exports = {
   getAllBillingDetailsController,
   getBillingDetailsByZonaController,
   getBillingDetailsByIdContratoController,
-  crearCuentaCobroManual
+  crearCuentaCobroManual,
+  getCuentasCobroPorFechasController,
+  registrarPagoFactura
 };

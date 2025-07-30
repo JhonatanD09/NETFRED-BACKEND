@@ -28,11 +28,20 @@ const getPaymentMethodByName = async (name) => {
   return (await pool).query('SELECT * FROM MEDIO_PAGO WHERE nombre = ?', name);
 };
 
+const getMedioPagoIdByNombre = async (nombre) => {
+  const [result] = await (await pool).query(
+    `SELECT id_medio_pago FROM medio_pago WHERE nombre = ?`,
+    [nombre]
+  );
+  return result.length > 0 ? result[0].id_medio_pago : null;
+};
+
 module.exports = {
   createPaymentMethod,
   getAllPaymentMethods,
   getPaymentMethodById,
   updatePaymentMethod,
   deletePaymentMethod,
-  getPaymentMethodByName
+  getPaymentMethodByName,
+  getMedioPagoIdByNombre
 };

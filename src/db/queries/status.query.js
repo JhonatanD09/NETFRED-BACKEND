@@ -27,6 +27,13 @@ const getAllEstado = async () => {
     return (await pool).query('SELECT * FROM ESTADO');
 };
   
+const getEstadoIdByName = async (nombre_estado, tabla_referencia) => {
+  const [rows] = await (await pool).query(
+    'SELECT id_estado FROM estado WHERE nombre_estado = ? AND tabla_referencia = ?',
+    [nombre_estado, tabla_referencia]
+  );
+  return rows.length > 0 ? rows[0].id_estado : null;
+};
 
 module.exports = {
     createEstado,
@@ -34,5 +41,6 @@ module.exports = {
     searchEstadoByID,
     deleteEstado,
     updateEstado,
-    getAllEstado
+    getAllEstado,
+    getEstadoIdByName
 }
