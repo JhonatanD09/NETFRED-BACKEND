@@ -14,7 +14,7 @@ function construirDatosDesdeResultado(resultado) {
   
   const fecha = hoy.toLocaleDateString('es-CO');
 
-  const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+  const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() , 1);
   const inicioMesAnterior = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth(), 1);
   const finMesAnterior = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth() + 1, 0);
 
