@@ -5,7 +5,7 @@ const generarPDF = (id, datos, dir) => {
 
     return new Promise((resolve) => {
         const doc = new PDFDocument();
-        const filePath = path.join(dir, `${datos.no_cedula?datos.no_cedula:'format'}.pdf`);
+        const filePath = path.join(dir, `${datos.cedula?datos.cedula:'format'}.pdf`);
         const stream = fs.createWriteStream(filePath);
 
         doc.pipe(stream);
