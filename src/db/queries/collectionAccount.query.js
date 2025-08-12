@@ -123,7 +123,7 @@ const getBillingDetails = async () => {
           s.precio AS subtotal_base,
           c.fecha_inicio,
           p.nombre_plan,
-          19 AS impuesto, -- Puedes parametrizar este valor si lo deseas
+          0 AS impuesto, -- Puedes parametrizar este valor si lo deseas
           
           -- Días facturados solo si es el primer mes
           DATEDIFF(
@@ -151,8 +151,8 @@ const getBillingDetails = async () => {
               (DATEDIFF(
                 LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
                 GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
-              ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
-              s.precio * (19 / 100)
+              ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (0 / 100),
+              s.precio * (0 / 100)
             ),
           2) AS IVA,
 
@@ -163,8 +163,8 @@ const getBillingDetails = async () => {
             GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
             ) + 1)
             * (s.precio / DAY(LAST_DAY(NOW())))
-            * (1 + 19 / 100),
-            s.precio * (1 + 19 / 100)
+            * (1 + 0 / 100),
+            s.precio * (1 + 0 / 100)
             ),
           2) AS total
 
@@ -190,7 +190,7 @@ const getBillingDetailsByZona = async (idZona) => {
         c.fecha_inicio,
         p.nombre_plan,
         z.nombre AS zona,
-        19 AS impuesto,
+        0 AS impuesto,
 
         DATEDIFF(
         LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
@@ -214,8 +214,8 @@ const getBillingDetailsByZona = async (idZona) => {
             (DATEDIFF(
               LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
               GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
-            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
-            s.precio * (19 / 100)
+            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (0 / 100),
+            s.precio * (0 / 100)
           ),
         2) AS IVA,
 
@@ -226,8 +226,8 @@ const getBillingDetailsByZona = async (idZona) => {
             GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
             ) + 1)
             * (s.precio / DAY(LAST_DAY(NOW())))
-            * (1 + 19 / 100),
-            s.precio * (1 + 19 / 100)
+            * (1 + 0 / 100),
+            s.precio * (1 + 0 / 100)
             ),
         2) AS total
 
@@ -257,7 +257,7 @@ const getBillingDetailsByIdContrato = async (idContrato) => {
         c.fecha_inicio,
         p.nombre_plan,
         z.nombre AS zona,
-        19 AS impuesto,
+        0 AS impuesto,
 
         DATEDIFF(
         LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
@@ -281,8 +281,8 @@ const getBillingDetailsByIdContrato = async (idContrato) => {
             (DATEDIFF(
               LEAST(LAST_DAY(NOW()), DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 29 DAY)),
               GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
-            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (19 / 100),
-            s.precio * (19 / 100)
+            ) + 1) * (s.precio / DAY(LAST_DAY(NOW()))) * (0 / 100),
+            s.precio * (0 / 100)
           ),
         2) AS IVA,
 
@@ -293,8 +293,8 @@ const getBillingDetailsByIdContrato = async (idContrato) => {
             GREATEST(c.fecha_inicio, DATE_FORMAT(NOW(), '%Y-%m-01'))
             ) + 1)
             * (s.precio / DAY(LAST_DAY(NOW())))
-            * (1 + 19 / 100),
-            s.precio * (1 + 19 / 100)
+            * (1 + 0 / 100),
+            s.precio * (1 + 0 / 100)
             ),
         2) AS total
 

@@ -108,13 +108,15 @@ const getHistoryByDocument = async (req, res) => {
 const getAllBillingDetailsController = async (req, res) => {
   try {
     const [results] = await getBillingDetails();
+    const mensajes = [];
+
     for (const detalle of results) {
 
       const fechaActual = new Date();
       const yaExiste = await cuentaCobroExisteParaContratoYMes(detalle.Referencia_Pago, fechaActual);
 
       if (yaExiste) {
-        res.status(500).json({ message: `⚠️ Ya existe una cuenta de cobro para algun(os) contrato(s) este mes. Se omite creación.` });
+        mensajes.push(`⚠️ Ya existe una cuenta de cobro para el contrato ${detalle.Referencia_Pago} este mes.`);
         //console.log(`⚠️ Ya existe una cuenta de cobro para el contrato ${detalle.Referencia_Pago} este mes. Se omite creación.`);
         continue;
       }
@@ -129,8 +131,10 @@ const getAllBillingDetailsController = async (req, res) => {
         fecha_pago: null
       };
       await createCuentaCobro(cuentaCobro);
+      mensajes.push(`✅ Cuenta de cobro creada para contrato ${detalle.Referencia_Pago}`);
+
     }
-    //res.status(201).json({ message: 'Cuentas de cobro generadas e insertadas correctamente.' });
+    res.status(201).json({ mensajes });
   } catch (error) {
     console.error('Error al generar e insertar cuentas de cobro:', error);
     res.status(500).json({ message: 'Error al generar las cuentas de cobro.' });

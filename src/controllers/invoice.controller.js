@@ -46,7 +46,8 @@ function construirDatosDesdeResultado(resultado) {
     mes: nombresMeses[mesAnterior.getMonth()],
     subTotal: subTotal,
     valor: valorTotal,
-    impuesto: parseFloat(resultado.impuesto),
+    //impuesto: parseFloat(resultado.impuesto),
+    impuesto: "0 %",
     valor_iva: valorIva,
     fechaCancelacion: formatFecha(hoy)
   };
@@ -73,7 +74,7 @@ const generate = async (req, res) => {
 
   await Promise.all(tareas); 
   await getAllBillingDetailsController(req, res);
-  res.json({ mensaje: '✅ Todos los PDFs fueron generados exitosamente y los registros fueron insertados en la base de datos.' });
+  //res.json({ mensaje: '✅ Todos los PDFs fueron generados exitosamente y los registros fueron insertados en la base de datos.' });
 };
 
 const generateEmpty = (req,res) => {
