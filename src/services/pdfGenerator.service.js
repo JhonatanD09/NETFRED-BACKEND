@@ -5,7 +5,7 @@ const generarPDF = (id, datos, dir) => {
 
     return new Promise((resolve) => {
         const doc = new PDFDocument();
-        const filePath = path.join(dir, `${datos.no_cedula?datos.no_cedula:'format'}.pdf`);
+        const filePath = path.join(dir, `${datos.cedula?datos.cedula:'format'}.pdf`);
         const stream = fs.createWriteStream(filePath);
 
         doc.pipe(stream);
@@ -205,7 +205,7 @@ function dibujarTablaInfo({ doc, data = [], width = null, xInit = null, yInit = 
             .font('Helvetica')
             .rect(marginLeft + columnWidth, y, columnWidth, rowHeight)
             .stroke()
-            .text(value, marginLeft + columnWidth + 5, label === 'Dirección'? y + 2:y+7, {
+            .text(value, marginLeft + columnWidth + 5, label === 'Dirección' || label === 'Nombre'? y + 2:y+7, {
                 width: columnWidth - 10,
                 align: 'left',
             });
