@@ -9,14 +9,12 @@ const config = require('../config');
 const outputDir = path.join(config.outDir.report);
 
 
-function construirDatosDesdeResultado(resultado) {
+function construirDatosDesdeResultado(resultado, mes, anio) {
   const hoy = new Date();
-  
-  const fecha = hoy.toLocaleDateString('es-CO');
 
-  const mesAnterior = new Date(hoy.getFullYear(), hoy.getMonth() , 1);
-  const inicioMesAnterior = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth(), 1);
-  const finMesAnterior = new Date(mesAnterior.getFullYear(), mesAnterior.getMonth() + 1, 0);
+  const fechaBase = new Date(anio, mes - 1, 1); 
+  const inicioMes = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), 1);
+  const finMes = new Date(fechaBase.getFullYear(), fechaBase.getMonth() + 1, 0);
 
   const formatFecha = (date) => date.toLocaleDateString('es-CO');
 
@@ -39,23 +37,24 @@ function construirDatosDesdeResultado(resultado) {
     cedula: resultado.no_cedula,
     direccion: resultado.direccion,
     celular: resultado.no_celular,
-    periodo: `${formatFecha(inicioMesAnterior)} - ${formatFecha(finMesAnterior)}`,
+    periodo: `${formatFecha(inicioMes)} - ${formatFecha(finMes)}`,
     pagoOportuno: formatFecha(pagoOportuno),
     suspension: formatFecha(suspension),
-    descripcion: `Pago mensualidad - ${resultado.nombre_plan?resultado.nombre_plan:''}`,
-    mes: nombresMeses[mesAnterior.getMonth()],
+    descripcion: `Pago mensualidad - ${resultado.nombre_plan || ''}`,
+    mes: nombresMeses[fechaBase.getMonth()],
     subTotal: subTotal,
     valor: valorTotal,
-    //impuesto: parseFloat(resultado.impuesto),
     impuesto: "0 %",
     valor_iva: valorIva,
     fechaCancelacion: formatFecha(hoy)
   };
 }
 
+
 const generate = async (req, res) => {
 
   let zonas = await getAllZones()
+  const {mes, anio} = req.body
   let tareas = [];
 
   zonas[0].forEach(async element => {
@@ -68,7 +67,7 @@ const generate = async (req, res) => {
     data = data[0]
 
     for (let i = 0; i < data.length; i++) {
-      tareas.push(pdfGenerateService.generarPDF(i+1,construirDatosDesdeResultado(data[i]),dir));
+      tareas.push(pdfGenerateService.generarPDF(i+1,construirDatosDesdeResultado(data[i],mes, anio),dir));
     }
   });
 
