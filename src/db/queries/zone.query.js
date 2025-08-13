@@ -108,6 +108,53 @@ const getContractsByZoneId = async (id_zona) => {
     );
 };
 
+/*const hasPendingCollectionAccounts = async (idContrato) => {
+  const [rows] = await (await pool).query(`
+    SELECT COUNT(*) AS pendientes
+    FROM cuenta_de_cobro
+    WHERE id_contrato = ? 
+      AND id_estado = (SELECT id_estado FROM estado 
+                       WHERE nombre_estado = 'Pendiente de Pago' 
+                         AND tabla_referencia = 'Cuenta Cobro')
+  `, [idContrato]);
+
+  return rows[0].pendientes > 0;
+};*/
+
+const hasPendingCollectionAccounts = async (idContrato) => {
+  // Consultar cantidad de cuentas pendientes
+  const [pendientes] = await (await pool).query(`
+    SELECT COUNT(*) AS total
+    FROM cuenta_de_cobro
+    WHERE id_contrato = ? 
+      AND id_estado = (
+        SELECT id_estado FROM estado 
+        WHERE nombre_estado = 'Pendiente de Pago'
+          AND tabla_referencia = 'Cuenta Cobro'
+      )
+  `, [idContrato]);
+
+  // Consultar cantidad de cuentas vencidas
+  const [vencidas] = await (await pool).query(`
+    SELECT COUNT(*) AS total
+    FROM cuenta_de_cobro
+    WHERE id_contrato = ?
+      AND id_estado = (
+        SELECT id_estado FROM estado 
+        WHERE nombre_estado = 'Vencida'
+          AND tabla_referencia = 'Cuenta Cobro'
+      )
+  `, [idContrato]);
+
+  if (vencidas[0].total > 0) {
+    return "Vencidas";
+  } else if (pendientes[0].total > 0) {
+    return "Pendientes";
+  } else {
+    return "Pagadas";
+  }
+};
+
 module.exports = {
     createZone,
     searchZoneByName,
@@ -118,5 +165,6 @@ module.exports = {
     getClientesByZoneName,
     getClientesByZoneId,
     getResumenZona,
-    getContractsByZoneId
+    getContractsByZoneId,
+    hasPendingCollectionAccounts
 }

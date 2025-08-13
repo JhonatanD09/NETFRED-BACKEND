@@ -1,4 +1,4 @@
-import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones, getClientesByZoneName, getClientesByZoneId, getResumenZona, getContractsByZoneId } from '../db/queries/zone.query'
+import {createZone,searchZoneByName, searchZoneByID, deleteZone, updateZone, getAllZones, getClientesByZoneName, getClientesByZoneId, getResumenZona, getContractsByZoneId, hasPendingCollectionAccounts } from '../db/queries/zone.query'
 import {zonesMessages} from '../constans/ErrorConstans'
 
 const create = async (req,res) =>{
@@ -162,7 +162,16 @@ const getAllContractsByZone = async (req, res) => {
             return res.status(404).json({ message: 'No hay contratos asociados a esta zona.' });
         }
 
-        res.status(200).json(results);
+        const enrichedResults = [];
+        for (const contrato of results) {
+            const pendiente = await hasPendingCollectionAccounts(contrato.id_contrato);
+            enrichedResults.push({
+                ...contrato,
+                tiene_pendientes: pendiente
+            });
+        }
+        
+        res.status(200).json(enrichedResults);
     } catch (error) {
         console.error('Error al obtener contratos por zona:', error);
         res.status(500).json({ message: 'Error al obtener contratos por zona.' });
