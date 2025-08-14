@@ -110,10 +110,17 @@ const getAllBillingDetailsController = async (req, res) => {
     const [results] = await getBillingDetails();
     const mensajes = [];
 
+    const { mes, anio } = req.body;
+
+    // Obtener el día actual
+    const diaActual = new Date().getDate();
+
+    const periodo = new Date(anio, mes - 1, diaActual);
+
     for (const detalle of results) {
 
       const fechaActual = new Date();
-      const yaExiste = await cuentaCobroExisteParaContratoYMes(detalle.Referencia_Pago, fechaActual);
+      const yaExiste = await cuentaCobroExisteParaContratoYMes(detalle.Referencia_Pago, periodo);
 
       if (yaExiste) {
         mensajes.push(`⚠️ Ya existe una cuenta de cobro para el contrato ${detalle.Referencia_Pago} este mes.`);
@@ -128,7 +135,8 @@ const getAllBillingDetailsController = async (req, res) => {
         id_contrato: detalle.Referencia_Pago,
         id_estado: 2, // por ejemplo, 1 = Generada o Pendiente
         valor_total_pago: detalle.total,
-        fecha_pago: null
+        fecha_pago: null,
+        periodo: periodo
       };
       await createCuentaCobro(cuentaCobro);
       mensajes.push(`✅ Cuenta de cobro creada para contrato ${detalle.Referencia_Pago}`);

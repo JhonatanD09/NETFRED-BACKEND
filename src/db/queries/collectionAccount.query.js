@@ -19,8 +19,8 @@ import pool from '../database'
 const createCuentaCobro = async (cuenta) => {
   const query =`
     INSERT INTO cuenta_de_cobro 
-    (fecha_creacion, id_medio_pago, impuesto, id_contrato, id_estado, valor_total_pago, fecha_pago) 
-    VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    (fecha_creacion, id_medio_pago, impuesto, id_contrato, id_estado, valor_total_pago, fecha_pago, periodo) 
+    VALUES (?, ?, ?, ?, ?, ?, ?,?)`;
   const values = [
     cuenta.fecha_creacion,
     cuenta.id_medio_pago || null,
@@ -28,7 +28,8 @@ const createCuentaCobro = async (cuenta) => {
     cuenta.id_contrato,
     cuenta.id_estado,
     cuenta.valor_total_pago || null,
-    cuenta.fecha_pago || null
+    cuenta.fecha_pago || null,
+    cuenta.periodo
   ];
   return (await pool).query(query, values);
 };
@@ -354,9 +355,9 @@ const registrarPagoDesdeCuentaCobro = async (idCuentaCobro) => {
   ]);
 };
 
-const cuentaCobroExisteParaContratoYMes = async (id_contrato, fecha_creacion) => {
+const cuentaCobroExisteParaContratoYMes = async (id_contrato, periodo) => {
   const db = await pool;
-  const [rows] = await db.query(` SELECT 1 FROM cuenta_de_cobro WHERE id_contrato = ? AND MONTH(fecha_creacion) = MONTH(?) AND YEAR(fecha_creacion) = YEAR(?) LIMIT 1 `, [id_contrato, fecha_creacion, fecha_creacion]);
+  const [rows] = await db.query(` SELECT 1 FROM cuenta_de_cobro WHERE id_contrato = ? AND MONTH(periodo) = MONTH(?) AND YEAR(periodo) = YEAR(?) LIMIT 1 `, [id_contrato, periodo, periodo]);
   return rows.length > 0;
 };
 
