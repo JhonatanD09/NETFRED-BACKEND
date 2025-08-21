@@ -20,11 +20,11 @@ function construirDatosDesdeResultado(resultado, mes, anio) {
 
   const nombresMeses = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
 
-  const pagoOportuno = new Date(hoy);
-  pagoOportuno.setDate(hoy.getDate() + 5);
+  const pagoOportuno = new Date(fechaBase);
+  pagoOportuno.setDate(fechaBase.getDate() + 5);
 
-  const suspension = new Date(hoy);
-  suspension.setDate(hoy.getDate() + 6);
+  const suspension = new Date(fechaBase);
+  suspension.setDate(fechaBase.getDate() +  6);
 
   const subTotal = parseFloat(resultado.subtotal);
   const valorIva = parseFloat(resultado.IVA);
@@ -58,7 +58,7 @@ const generate = async (req, res) => {
   let tareas = [];
 
   zonas[0].forEach(async element => {
-    let dir =path.join(outputDir,String(new Date().toLocaleDateString('es-CO').toString().replaceAll('/', '-')),element.nombre)
+    let dir =path.join(outputDir,String(mes+"-"+anio),element.nombre)
     console.log('📁 Creando carpeta en:',dir);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
