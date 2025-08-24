@@ -1,4 +1,4 @@
-import {updateEstadoCuentaCobro,insertarPago,getBillingDetailsPago,updateCuentaCobroMedioPago,createCuentaCobro, getCuentasCobroPorRangoFechas,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato, cuentaCobroExisteParaContratoYMes, obtenerInfoContratoParaCobro, insertarCuentaCobro} from '../db/queries/collectionAccount.query'
+import {updateEstadoCuentaCobro,insertarPago,getBillingDetailsPago,updateCuentaCobroMedioPago,createCuentaCobro, getCuentasCobroPorRangoFechas,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato, cuentaCobroExisteParaContratoYMes, obtenerInfoContratoParaCobro, insertarCuentaCobro, marcarCuentasVencidas} from '../db/queries/collectionAccount.query'
 import {cuentaCobroMessages} from '../constans/ErrorConstans'
 import {getMedioPagoIdByNombre} from '../db/queries/metodoPago.query'
 import {getEstadoIdByName} from '../db/queries/status.query'
@@ -293,6 +293,20 @@ const registrarPagoFactura = async (req, res) => {
   }
 };
 
+const actualizarCuentasVencidas = async (req, res) => {
+  try {
+    const diasVencimiento = parseInt(process.env.COBRO_DIAS_VENCIMIENTO);
+
+    await marcarCuentasVencidas(diasVencimiento);
+
+    res.status(200).json({ message: "Cuentas vencidas actualizadas correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar cuentas vencidas:", error);
+    res.status(500).json({ message: "Error al actualizar cuentas vencidas" });
+  }
+};
+
+
 module.exports = {
   create,
   getAll,
@@ -306,5 +320,6 @@ module.exports = {
   getBillingDetailsByIdContratoController,
   crearCuentaCobroManual,
   getCuentasCobroPorFechasController,
-  registrarPagoFactura
+  registrarPagoFactura,
+  actualizarCuentasVencidas
 };

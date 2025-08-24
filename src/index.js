@@ -1,6 +1,8 @@
 const express = require('express');
 const config = require('./config');
 import {routes} from './constans/RoutesConstans'
+import "./jobs/scheduler.js"; 
+
 
 const app = express();
 const port = config.app.port

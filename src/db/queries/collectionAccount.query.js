@@ -505,6 +505,29 @@ const insertarPago = async (fecha_pago,valor_pagado,id_cuenta_cobro,id_medio_pag
   return (await pool).query(query, values);
 };
 
+const marcarCuentasVencidas = async (diasVencimiento) => {
+  const query = `
+    UPDATE cuenta_de_cobro
+    SET id_estado = (
+        SELECT id_estado FROM estado
+        WHERE nombre_estado = 'Vencida'
+          AND tabla_referencia = 'Cuenta Cobro'
+    )
+    WHERE id_estado = (
+        SELECT id_estado FROM estado
+        WHERE nombre_estado = 'Pendiente de Pago'
+          AND tabla_referencia = 'Cuenta Cobro'
+    )
+    AND DATE_ADD(
+          LAST_DAY(periodo), 
+          INTERVAL ? DAY
+        ) < CURDATE(); -- hoy
+    `;
+
+  return (await pool).query(query, [diasVencimiento]);
+};
+
+
 module.exports = {
   createCuentaCobro,
   getAllCuentasCobro,
@@ -524,5 +547,6 @@ module.exports = {
   updateCuentaCobroMedioPago,
   updateEstadoCuentaCobro,
   getBillingDetailsPago,
-  insertarPago
+  insertarPago,
+  marcarCuentasVencidas
 };
