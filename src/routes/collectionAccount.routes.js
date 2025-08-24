@@ -16,6 +16,6 @@ router.get('/filtrar-por-fechas', [verifyToken, verifyAccessRole],controller.get
 router.get('/:id', [verifyToken, verifyAccessRole], controller.getById);
 router.post('/registrar-pago', [verifyToken, verifyAccessRole], controller.registrarPagoFactura);
 router.post('/',[verifyToken, verifyAccessRole],controller.crearCuentaCobroManual);
-router.put('/cuentas/vencidas',[verifyToken, verifyAdminRole], controller.actualizarCuentasVencidas);
+router.put('/cuentas/vencidas',[verifyToken, verifyAccessRole], controller.actualizarCuentasVencidas);
 
 module.exports = router;
