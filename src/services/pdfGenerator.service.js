@@ -18,7 +18,9 @@ const generarPDF = (id, datos, dir) => {
 
         doc.image('src/services/assets/fondo.jpeg', 0, 0, { width: 620, height: 900 });
 
+        doc.opacity(0.3);
         doc.image('src/services/assets/logo.jpg', 75, 10, { width: 200, height: 120 });
+        doc.opacity(1);
 
         const tabX = originalX + 300;
 

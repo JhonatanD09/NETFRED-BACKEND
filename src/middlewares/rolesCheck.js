@@ -10,3 +10,13 @@ export const verifyAdminRole = async(req, res, next) =>{
         res.status(400).json({ message: err.message })
     }
 }
+
+export const verifyAccessRole = async(req, res, next) =>{
+    try{
+        let user = req.user[0][0]
+        if(user.rol != ROLES.ADMIN_ROLE && user.rol != ROLES.USER) return res.status(404).json({ message: valideRolesMessages.NO_ROLE_REQUIRED })
+        next()
+    }catch (err){
+        res.status(400).json({ message: err.message })
+    }
+}

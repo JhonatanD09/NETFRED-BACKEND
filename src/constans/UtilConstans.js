@@ -1,5 +1,6 @@
 export const ROLES = {
-    ADMIN_ROLE : 'ADMIN'
+    ADMIN_ROLE : 'ADMIN',
+    USER : 'USER'
 }
 
 export const tokenConstans = {
