@@ -96,6 +96,7 @@ const getContractsByZoneId = async (id_zona) => {
             ct.ubicacion,
             ct.georreferencia,
             ct.id_estado ,
+            ct.Observacion,
             z.nombre AS zona,
             p.nombre_plan
         FROM contrato ct

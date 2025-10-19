@@ -8,6 +8,7 @@
         "express": "^5.1.0",
         "jsonwebtoken": "^9.0.2",
         "mysql2": "^3.14.0",
+        "node-cron": "^4.2.1",
         "pdfkit": "^0.17.1",
         "puppeteer": "^24.10.0",
       },
@@ -660,6 +661,8 @@
     "negotiator": ["negotiator@1.0.0", "", {}, "sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg=="],
 
     "netmask": ["netmask@2.0.2", "", {}, "sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg=="],
+
+    "node-cron": ["node-cron@4.2.1", "", {}, "sha512-lgimEHPE/QDgFlywTd8yTR61ptugX3Qer29efeyWw2rv259HtGBNn1vZVmp8lB9uo9wC0t/AT4iGqXxia+CJFg=="],
 
     "node-environment-flags": ["node-environment-flags@1.0.6", "", { "dependencies": { "object.getownpropertydescriptors": "^2.0.3", "semver": "^5.7.0" } }, "sha512-5Evy2epuL+6TM0lCQGpFIj6KwiEsGh1SrHUhTbNX+sLbBtjidPZFAnVK9y5yU1+h//RitLbRHTIMyxQPtxMdHw=="],
 

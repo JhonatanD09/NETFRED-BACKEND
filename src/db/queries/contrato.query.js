@@ -48,7 +48,8 @@ const updateContract = async (contract, id) => {
             fecha_terminacion = ?, 
             fecha_inscripcion = ?, 
             ubicacion = ?, 
-            Georreferencia = ?
+            Georreferencia = ?,
+            Observacion = ?
          WHERE id_contrato = ?`,
         [
             formatDateForMySQL(contract.startDate),
@@ -57,6 +58,7 @@ const updateContract = async (contract, id) => {
             formatDateForMySQL(contract.inscriptionDate),
             contract.location,
             contract.georeference,
+            contract.details,
             id
         ]
     );
