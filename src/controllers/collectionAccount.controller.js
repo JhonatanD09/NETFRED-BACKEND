@@ -1,4 +1,4 @@
-import {updateEstadoCuentaCobro,insertarPago,getBillingDetailsPago,updateCuentaCobroMedioPago,createCuentaCobro, getCuentasCobroPorRangoFechas,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato, cuentaCobroExisteParaContratoYMes, obtenerInfoContratoParaCobro, insertarCuentaCobro, marcarCuentasVencidas} from '../db/queries/collectionAccount.query'
+import {updateEstadoCuentaCobro,insertarPago,getBillingDetailsPago,updateCuentaCobroMedioPago,createCuentaCobro, getCuentasCobroPorRangoFechas,getAllCuentasCobro,getCuentaCobroById,updateCuentaCobro,deleteCuentaCobro, getBillsByClientDocument, getBillingDetails, getEstadoIdByNombre, registrarPagoDesdeCuentaCobro, getBillingDetailsByZona, getBillingDetailsByIdContrato, cuentaCobroExisteParaContratoYMes, obtenerInfoContratoParaCobro, insertarCuentaCobro, marcarCuentasVencidas, getCuentasCobroPorContrato} from '../db/queries/collectionAccount.query'
 import {cuentaCobroMessages} from '../constans/ErrorConstans'
 import {getMedioPagoIdByNombre} from '../db/queries/metodoPago.query'
 import {getEstadoIdByName} from '../db/queries/status.query'
@@ -306,6 +306,27 @@ const actualizarCuentasVencidas = async (req, res) => {
   }
 };
 
+const getCuentasCobroPorContratoController = async (req, res) => {
+  try {
+    const idContrato = req.params.id;
+    
+    if (!idContrato) {
+      return res.status(400).json({ message: 'Debe especificar el ID del contrato.' });
+    }
+
+    const [cuentas] = await getCuentasCobroPorContrato(idContrato);
+    
+    if (cuentas.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron cuentas de cobro para este contrato.' });
+    }
+
+    res.status(200).json(cuentas);
+  } catch (error) {
+    console.error('Error al obtener cuentas de cobro por contrato:', error);
+    res.status(500).json({ message: 'Error al obtener cuentas de cobro del contrato.' });
+  }
+};
+
 
 module.exports = {
   create,
@@ -321,5 +342,6 @@ module.exports = {
   crearCuentaCobroManual,
   getCuentasCobroPorFechasController,
   registrarPagoFactura,
-  actualizarCuentasVencidas
+  actualizarCuentasVencidas,
+  getCuentasCobroPorContratoController
 };

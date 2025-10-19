@@ -527,6 +527,38 @@ const marcarCuentasVencidas = async (diasVencimiento) => {
   return (await pool).query(query, [diasVencimiento]);
 };
 
+const getCuentasCobroPorContrato = async (idContrato) => {
+  const query = `
+    SELECT 
+      cc.id_cuenta_cobro,
+      cc.fecha_creacion,
+      cc.impuesto,
+      cc.valor_total_pago,
+      cc.fecha_pago,
+      cc.periodo,
+      cc.id_contrato,
+      mp.nombre AS nombre_medio_pago,
+      e.nombre_estado,
+      cl.nombres_completos AS nombre_cliente,
+      cl.numero_documento_cliente,
+      p.nombre_plan,
+      s.precio AS precio_servicio
+    FROM 
+      cuenta_de_cobro cc
+    INNER JOIN contrato c ON cc.id_contrato = c.id_contrato
+    INNER JOIN cliente cl ON c.numero_documento_cliente = cl.numero_documento_cliente
+    INNER JOIN servicio s ON c.id_servicio = s.id_servicio
+    INNER JOIN planes p ON s.id_plan = p.id_plan
+    INNER JOIN estado e ON cc.id_estado = e.id_estado
+    LEFT JOIN medio_pago mp ON cc.id_medio_pago = mp.id_medio_pago
+    WHERE 
+      cc.id_contrato = ?
+    ORDER BY 
+      cc.fecha_creacion DESC
+  `;
+  return (await pool).query(query, [idContrato]);
+};
+
 
 module.exports = {
   createCuentaCobro,
@@ -548,5 +580,6 @@ module.exports = {
   updateEstadoCuentaCobro,
   getBillingDetailsPago,
   insertarPago,
-  marcarCuentasVencidas
+  marcarCuentasVencidas,
+  getCuentasCobroPorContrato
 };

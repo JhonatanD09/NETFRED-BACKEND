@@ -36,6 +36,39 @@ const getMedioPagoIdByNombre = async (nombre) => {
   return result.length > 0 ? result[0].id_medio_pago : null;
 };
 
+// Verificar si un método de pago está siendo utilizado
+const isPaymentMethodInUse = async (id) => {
+  try {
+    // Verificar en tabla cuenta_de_cobro
+    const [cuentaCobroResult] = await (await pool).query(
+      `SELECT COUNT(*) as count FROM cuenta_de_cobro WHERE id_medio_pago = ?`,
+      [id]
+    );
+    
+    // Verificar en tabla Pago
+    const [pagoResult] = await (await pool).query(
+      `SELECT COUNT(*) as count FROM Pago WHERE id_medio_pago = ?`,
+      [id]
+    );
+    
+    const totalUsage = cuentaCobroResult[0].count + pagoResult[0].count;
+    return {
+      inUse: totalUsage > 0,
+      usage: {
+        cuentas_cobro: cuentaCobroResult[0].count,
+        pagos: pagoResult[0].count,
+        total: totalUsage
+      }
+    };
+  } catch (error) {
+    console.error('Error verificando uso del método de pago:', error);
+    return {
+      inUse: true, // Por seguridad, asumir que está en uso si hay error
+      usage: { error: error.message }
+    };
+  }
+};
+
 module.exports = {
   createPaymentMethod,
   getAllPaymentMethods,
@@ -43,5 +76,6 @@ module.exports = {
   updatePaymentMethod,
   deletePaymentMethod,
   getPaymentMethodByName,
-  getMedioPagoIdByNombre
+  getMedioPagoIdByNombre,
+  isPaymentMethodInUse
 };
